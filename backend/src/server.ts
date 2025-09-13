@@ -1,14 +1,18 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { Database } from "./database";
-import { PlanParser } from "./planParser";
+import { PlanParser, NodeInfo } from "./planParser";
+import { upload } from "./upload";
 import {
   ExplainRequest,
   ExplainResponse,
   SampleQuery,
   ExecuteResponse,
   GraphResponse,
-  NodeInfo
+  NodeInfo,
+  DatabaseUploadResponse,
+  DatabaseUploadRequest,
+  CurrentDatabaseResponse,
 } from "./types";
 import { QueryGraph } from "./graph";
 
@@ -151,6 +155,48 @@ app.post(
   },
 );
 
+app.post(
+  "/api/upload-database",
+  upload.single("database"),
+  async (
+    req: Request<{}, DatabaseUploadResponse, DatabaseUploadRequest>,
+    res: Response<DatabaseUploadResponse>,
+  ) => {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        error: "No db file uploaded",
+      });
+    }
+
+    const { databaseName } = req.body;
+
+    try {
+      const result = await db.replaceDatabase(req.file.path, databaseName);
+      res.json({
+        success: true,
+        message: result,
+        filename: req.file.originalname,
+      });
+    } catch (error) {
+      console.error("Database Upload error: ", error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Upload failed",
+      });
+    }
+  },
+);
+
+app.get(
+  "/api/current-database",
+  (req: Request, res: Response<CurrentDatabaseResponse>) => {
+    res.json({
+      success: true,
+      currentDatabase: db.getCurrentDatabase(),
+    });
+  },
+);
 
 const PORT: number = 3001;
 
