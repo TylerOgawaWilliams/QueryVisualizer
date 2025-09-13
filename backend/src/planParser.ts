@@ -155,4 +155,8 @@ export class PlanParser {
     traverse(rootNode);
     return nodes;
   }
+
+  static get_graph(nodes: NodeInfo[]) {
+    
+  }
 }

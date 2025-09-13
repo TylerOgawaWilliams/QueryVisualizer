@@ -56,3 +56,17 @@ export interface ExecuteResponse {
   fields?: Array<{ name: string; dataType: number }>;
   error?: string;
 }
+
+export interface Node {
+  id: string;
+  type: NodeType;
+  position: {
+    x: number,
+    y: number
+  };
+  data: any;
+}
+
+export interface NodeType {
+  "seq-scan": string;
+}
