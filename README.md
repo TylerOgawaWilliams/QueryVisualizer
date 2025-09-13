@@ -18,6 +18,7 @@ docker run --name postgres-dev \
 docker cp dvdrental.tar postgres-dev:/tmp/backup.tar
 
 1.3
+
 docker exec -it postgres-dev psql -U postgres -c "CREATE DATABASE dvdrental;"
 ```
 
