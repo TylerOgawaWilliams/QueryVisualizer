@@ -85,6 +85,7 @@ export class PlanParser {
     traverse(root_node);
     return execution_order;
   }
+  
   static getNodeStats(nodes: NodeInfo[]) {
     const costs = nodes.map((n) => n.totalCost).filter((c) => c > 0);
     const rows = nodes.map((n) => n.planRows).filter((r) => r > 0);
