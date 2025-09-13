@@ -16,6 +16,33 @@ export interface PlanNode {
   "Hash Cond"?: string;
   "Sort Key"?: string[];
   "Join Filter"?: string;
+  "Output"?: string[];
+}
+
+export interface NodeInfo {
+  id: string;
+  nodeType: string;
+  totalCost: number;
+  parentId?: string;
+  relationName?: string;
+  startupCost: number;
+  planRows: number;
+  actualRows?: number;
+  actualTime?: number;
+  children: NodeInfo[];
+  filter?: string;
+  indexName?: string;
+  joinType?: string;
+  depth: number;
+  output?: string[];
+}
+
+export interface SourceNodeInfo {
+  id: string;
+  targetNode: string;
+  relationName: string;
+  columns: string[];
+  depth: number;
 }
 
 export interface ExplainRequest {
@@ -44,6 +71,15 @@ export interface ExplainResponse {
   error?: string;
 }
 
+export interface GraphRequest {
+  query: string;
+}
+
+export interface GraphResponse {
+  graph: Graph;
+  error: boolean | string;
+}
+
 export interface SampleQuery {
   name: string;
   query: string;
@@ -57,6 +93,11 @@ export interface ExecuteResponse {
   error?: string;
 }
 
+export interface Graph {
+  nodes: Node[],
+  edges: Edge[]
+}
+
 export interface Node {
   id: string;
   type: NodeType;
@@ -64,11 +105,32 @@ export interface Node {
     x: number;
     y: number;
   };
-  data: any;
+  data: NodeData;
 }
 
-export interface NodeType {
-  "seq-scan": string;
+export interface NodeData {
+  depth: number,
+  name?: string
+}
+
+export interface SourceNodeData extends NodeData {
+  columns?: string[]
+}
+
+export interface SeqScanNodeData extends NodeData {
+  columns?: string[]
+}
+
+export enum NodeType {
+  SOURCE = 'source',
+  SEQ_SCAN = 'seq_scan',
+  NONE = 'none'
+}
+
+export interface Edge {
+  id: string, 
+  source: string,
+  target: string
 }
 
 export interface DatabaseUploadRequest {

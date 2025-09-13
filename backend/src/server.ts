@@ -1,6 +1,5 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { Pool, PoolClient } from "pg";
 import { Database } from "./database";
 import { PlanParser, NodeInfo } from "./planParser";
 import { upload } from "./upload";
@@ -9,10 +8,13 @@ import {
   ExplainResponse,
   SampleQuery,
   ExecuteResponse,
+  GraphResponse,
+  NodeInfo,
   DatabaseUploadResponse,
   DatabaseUploadRequest,
   CurrentDatabaseResponse,
 } from "./types";
+import { QueryGraph } from "./graph";
 
 const app = express();
 app.use(cors());
@@ -36,6 +38,41 @@ app.get("/api/test-query", (req: Request, res: Response<SampleQuery[]>) => {
 
   res.json(test_query);
   console.log("Success!");
+});
+
+app.get("/api/query-graph", async (req: Request, res: Response) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+      error: "Query is required",
+    });
+  } 
+
+  try {
+    const raw_plan = await db.explainQuery(query);
+    console.log(
+      "Raw Query Plan recieved: ",
+      JSON.stringify(raw_plan, null, 2),
+    );
+    const parsed_plan = PlanParser.parsePlan(raw_plan);
+    const execution_order = PlanParser.getExecutionOrder(parsed_plan);
+    const source_nodes = await db.sourceNodeInfo(execution_order);
+    const graph = QueryGraph.getGraph(execution_order, source_nodes);
+    const resp : GraphResponse = {
+      graph: graph,
+      error: false
+    }
+
+    res.json(resp)
+  } catch (e) {
+      console.error("Query execution error:", e);
+      res.status(500).json({
+        success: false,
+        error: e instanceof Error ? e.message : "Unknown error",
+      });
+  }
 });
 
 app.post(
@@ -172,3 +209,7 @@ process.on("SIGINT", async () => {
   await db.close();
   process.exit(0);
 });
+function sourceNodeInfo(execution_order: NodeInfo[]) {
+  throw new Error("Function not implemented.");
+}
+
