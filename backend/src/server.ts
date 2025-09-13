@@ -2,7 +2,7 @@ import express, { Request, Response } from "express";
 import cors from "cors";
 import { Pool, PoolClient } from "pg";
 import { Database } from "./database";
-import { PlanParser } from "./planParser";
+import { PlanParser, NodeInfo } from "./planParser";
 import {
   ExplainRequest,
   ExplainResponse,
@@ -13,6 +13,7 @@ import {
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const db = new Database();
 
@@ -79,12 +80,29 @@ app.post(
 
     try {
       console.log("Analyzing query:", query);
-      const rawPlan = await db.explainQuery(query);
-      const parsedPlan = PlanParser.parsePlan(rawPlan);
+      const raw_plan = await db.explainQuery(query);
+      console.log(
+        "Raw Query Plan recieved: ",
+        JSON.stringify(raw_plan, null, 2),
+      );
+      const parsed_plan = PlanParser.parsePlan(raw_plan);
+      const flat_nodes = PlanParser.flattenTree(parsed_plan);
+      const links = PlanParser.getTreeLinks(parsed_plan);
+      const stats = PlanParser.getNodeStats(flat_nodes);
+      const execution_order = PlanParser.getExecutionOrder(parsed_plan);
+      const bottlenecks = PlanParser.findBottlenecks(flat_nodes);
 
       res.json({
         success: true,
-        plan: parsedPlan,
+        plan: {
+          tree: parsed_plan,
+          nodes: flat_nodes,
+          links: links,
+          stats: stats,
+          executionOrder: execution_order,
+          bottlenecks: bottlenecks,
+          originalQuery: query,
+        },
       });
     } catch (error) {
       console.error("Query analysis error:", error);

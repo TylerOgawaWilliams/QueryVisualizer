@@ -32,6 +32,9 @@ export class PlanParser {
   ): NodeInfo {
     const id = `node-${++this.nodeCounter}`;
 
+    console.log(`Processing node at depth ${depth}: ${node["Node Type"]}`);
+    console.log(`Node has ${node.Plans?.length || 0} children`);
+
     const single_node: NodeInfo = {
       id,
       nodeType: node["Node Type"],
@@ -42,21 +45,25 @@ export class PlanParser {
       actualRows: node["Actual Rows"],
       actualTime: node["Actual Total Time"],
       children: [],
-      filter: node.Filter,
+      filter: node.Filter || node["Join Filter"],
       indexName: node["Index Name"],
       joinType: node["Join Type"],
       depth,
       parentId,
     };
 
+    // Recursively process children
     if (node.Plans && node.Plans.length > 0) {
+      console.log(
+        `Converting ${node.Plans.length} children for ${node["Node Type"]}`,
+      );
       single_node.children = node.Plans.map((child_plan: PlanNode) =>
         this.convertNode(child_plan, id, depth + 1),
       );
     }
+
     return single_node;
   }
-
   static getTreeLinks(
     root_node: NodeInfo,
   ): Array<{ source: string; target: string }> {
@@ -93,13 +100,17 @@ export class PlanParser {
       .map((n) => n.actualRows)
       .filter((r) => r !== undefined && r > 0) as number[];
 
+    const total_cost = costs.reduce((a, b) => a + b, 0);
+
     return {
       maxCost: costs.length > 0 ? Math.max(...costs) : 0,
       minCost: costs.length > 0 ? Math.min(...costs) : 0,
       maxRows: rows.length > 0 ? Math.max(...rows) : 0,
       minRows: rows.length > 0 ? Math.min(...rows) : 0,
       maxActualRows: actual_rows.length > 0 ? Math.max(...actual_rows) : 0,
-      avgCost: costs.reduce((a, b) => a + b, 0) / costs.length,
+      avgCost:
+        costs.length > 0 ? costs.reduce((a, b) => a + b, 0) / costs.length : 0,
+      totalCost: total_cost,
       totalNodes: nodes.length,
     };
   }
