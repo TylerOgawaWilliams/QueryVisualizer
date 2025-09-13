@@ -1,21 +1,4 @@
-import { PlanNode } from "./types";
-
-export interface NodeInfo {
-  id: string;
-  nodeType: string;
-  totalCost: number;
-  parentId?: string;
-  relationName?: string;
-  startupCost: number;
-  planRows: number;
-  actualRows?: number;
-  actualTime?: number;
-  children: NodeInfo[];
-  filter?: string;
-  indexName?: string;
-  joinType?: string;
-  depth: number;
-}
+import { PlanNode, NodeInfo } from "./types";
 
 export class PlanParser {
   private static nodeCounter = 0;
@@ -48,6 +31,7 @@ export class PlanParser {
       filter: node.Filter || node["Join Filter"],
       indexName: node["Index Name"],
       joinType: node["Join Type"],
+      output: node["Output"],
       depth,
       parentId,
     };
@@ -154,9 +138,5 @@ export class PlanParser {
 
     traverse(rootNode);
     return nodes;
-  }
-
-  static get_graph(nodes: NodeInfo[]) {
-    
   }
 }
