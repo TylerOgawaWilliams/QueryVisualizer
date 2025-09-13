@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query'
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -11,17 +12,24 @@ import ReactFlow, {
 
 import 'reactflow/dist/style.css';
 import './queryTree.css'
-
-const initialNodes = [
-  { id: '1', data: { label: '1' } },
-  { id: '2', data: { label: '2' } },
-];
-
-const initialEdges = [{ id: 'e1-2', source: '1', target: '2' }];
+import { fetchGraph } from '../../helpers/api';
+import type { Graph } from '../../types';
 
 export function QueryTree() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  // const [graph, setGraph] = useState();
+
+  useEffect(() => {
+    async function graph() {
+      const { graph } = await fetchGraph();
+      setNodes(graph.nodes);
+      setEdges(graph.edges);
+    }   
+    
+    graph();
+  }, [])
+
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   const onConnect = useCallback((params: Connection) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
