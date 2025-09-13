@@ -40,7 +40,7 @@ app.get("/api/test-query", (req: Request, res: Response<SampleQuery[]>) => {
   console.log("Success!");
 });
 
-app.get("/api/query-graph", async (req: Request, res: Response) => {
+app.post("/api/query-graph", async (req: Request, res: Response) => {
   const { query } = req.body;
 
   if (!query) {
