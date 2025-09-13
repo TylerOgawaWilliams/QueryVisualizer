@@ -46,7 +46,7 @@ export class Database {
 
   async explainQuery(query: string): Promise<any> {
     try {
-      const explain_query = `EXPLAIN (ANALYZE, FORMAT JSON) ${query}`;
+      const explain_query = `EXPLAIN (ANALYZE, VERBOSE, FORMAT JSON) ${query}`;
       const result = await this.pool.query(explain_query);
 
       const plan_wrapper = result.rows[0]["QUERY PLAN"][0];
