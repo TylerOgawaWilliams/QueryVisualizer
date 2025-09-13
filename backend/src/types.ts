@@ -61,12 +61,28 @@ export interface Node {
   id: string;
   type: NodeType;
   position: {
-    x: number,
-    y: number
+    x: number;
+    y: number;
   };
   data: any;
 }
 
 export interface NodeType {
   "seq-scan": string;
+}
+
+export interface DatabaseUploadRequest {
+  databaseName: string;
+}
+
+export interface DatabaseUploadResponse {
+  success: boolean;
+  message?: string;
+  filename?: string;
+  error?: string;
+}
+
+export interface CurrentDatabaseResponse {
+  success: boolean;
+  currentDatabase: string;
 }
