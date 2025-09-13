@@ -31,3 +31,18 @@ docker exec -it postgres-dev psql -U postgres -d dvdrental
 ## Running the frontend
 
 #### 1. 
+
+## Useful Links
+
+[Load PostgreSQL Sample Database](https://neon.com/postgresql/postgresql-getting-started/load-postgresql-sample-database)
+
+[D3 Library](https://d3js.org/d3-hierarchy/tree)
+
+[Tidy Tree Component](https://observablehq.com/@d3/tree-component)
+
+[PostgreS Explain 1.](https://www.postgresql.org/docs/current/using-explain.html)
+
+[PostgreS Explain 2.](https://www.postgresql.org/docs/current/sql-explain.html)
+
+
+
