@@ -6,7 +6,7 @@ export async function fetchGraph() {
     const URL = API_URL + 'query-graph';
     console.log(URL);
     const response = await fetch(URL, {
-        method: 'GET',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
