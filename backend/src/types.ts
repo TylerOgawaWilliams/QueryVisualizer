@@ -128,9 +128,9 @@ export enum NodeType {
 }
 
 export interface Edge {
-  id: string, 
-  source: string,
-  target: string
+  id: string;
+  source: string;
+  target: string;
 }
 
 export interface DatabaseUploadRequest {

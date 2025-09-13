@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { Database } from "./database";
-import { PlanParser, NodeInfo } from "./planParser";
+import { PlanParser } from "./planParser";
 import { upload } from "./upload";
 import {
   ExplainRequest,
@@ -162,7 +162,8 @@ app.post(
     req: Request<{}, DatabaseUploadResponse, DatabaseUploadRequest>,
     res: Response<DatabaseUploadResponse>,
   ) => {
-    if (!req.file) {
+    const file = req.file as Express.Multer.File;
+    if (!file) {
       return res.status(400).json({
         success: false,
         error: "No db file uploaded",
@@ -172,11 +173,11 @@ app.post(
     const { databaseName } = req.body;
 
     try {
-      const result = await db.replaceDatabase(req.file.path, databaseName);
+      const result = await db.replaceDatabase(file.path, databaseName);
       res.json({
         success: true,
         message: result,
-        filename: req.file.originalname,
+        filename: file.originalname,
       });
     } catch (error) {
       console.error("Database Upload error: ", error);

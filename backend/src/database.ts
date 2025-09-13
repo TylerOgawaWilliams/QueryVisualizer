@@ -96,6 +96,7 @@ export class Database {
     }
 
     return source_nodes;
+  }
 
   async replaceDatabase(
     file_path: string,
