@@ -1,94 +1,108 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import { Pool, PoolClient } from "pg";
-
-interface SampleQuery {
-  name: string;
-  query: string;
-}
-
-interface ExplainRequest {
-  query: string;
-}
+import { Database } from "./database";
+import { PlanParser } from "./planParser";
+import {
+  ExplainRequest,
+  ExplainResponse,
+  SampleQuery,
+  ExecuteResponse,
+} from "./types";
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Postgres connection
-const pool: Pool = new Pool({
-  host: "localhost",
-  port: 5432,
-  database: "dvdrental",
-  user: "postgres",
-  password: "password",
-});
-
-pool
-  .connect()
-  .then((client: PoolClient) => {
-    console.log("Connected to the Postgres DB!");
-    client.release();
-  })
-  .catch((err: Error) => {
-    console.error("Database connection is so so cooked: ", err.message);
-  });
+const db = new Database();
 
 app.get("/api/test", (req: Request, res: Response) => {
   console.log("Test endpoint hit!");
   res.json({ message: "Backend working!" });
 });
 
-app.get("/api/test-queries", (req: Request, res: Response<SampleQuery[]>) => {
-  const test_queries: SampleQuery[] = [
+app.get("/api/test-query", (req: Request, res: Response<SampleQuery[]>) => {
+  const test_query: SampleQuery[] = [
     {
       name: "Simple Actor Query",
       query: "SELECT * FROM ACTOR LIMIT 10;",
     },
   ];
 
-  res.json(test_queries);
+  res.json(test_query);
   console.log("Success!");
 });
 
 app.post(
-  "/api/query",
-  async (req: Request<{}, any, ExplainRequest>, res: Response) => {
+  "/api/execute",
+  async (
+    req: Request<{}, ExecuteResponse, ExplainRequest>,
+    res: Response<ExecuteResponse>,
+  ) => {
     const { query }: ExplainRequest = req.body;
 
     if (!query) {
       return res.status(400).json({
         success: false,
-        error: "There is no query!",
+        error: "Query is required",
       });
     }
 
     try {
-      console.log("Executing the query:", query);
-      const result = await pool.query(query);
-
-      console.log(`Query returned ${result.rows.length} rows`);
-      res.json({
-        success: true,
-        rows: result.rows,
-        rowCount: result.rowCount,
-        fields: result.fields?.map((field) => ({
-          name: field.name,
-          dataType: field.dataTypeID,
-        })),
-      });
+      console.log("Executing query:", query);
+      const result = await db.executeQuery(query);
+      res.json(result);
     } catch (error) {
-      console.error("There was a problem executing the query: ", error);
+      console.error("Query execution error:", error);
       res.status(500).json({
         success: false,
-        erorr: error instanceof Error ? error.message : "Unknown error",
+        error: error instanceof Error ? error.message : "Unknown error",
       });
     }
   },
 );
 
+app.post(
+  "/api/explain",
+  async (
+    req: Request<{}, ExplainResponse, ExplainRequest>,
+    res: Response<ExplainResponse>,
+  ) => {
+    const { query }: ExplainRequest = req.body;
+
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        error: "Query is required",
+      });
+    }
+
+    try {
+      console.log("Analyzing query:", query);
+      const rawPlan = await db.explainQuery(query);
+      const parsedPlan = PlanParser.parsePlan(rawPlan);
+
+      res.json({
+        success: true,
+        plan: parsedPlan,
+      });
+    } catch (error) {
+      console.error("Query analysis error:", error);
+      res.status(500).json({
+        success: false,
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  },
+);
 const PORT: number = 3001;
 
 app.listen(PORT, (): void => {
   console.log(`Server running on port ${PORT}`);
+});
+
+process.on("SIGINT", async () => {
+  console.log("Shutting down gracefully...");
+  await db.close();
+  process.exit(0);
 });
