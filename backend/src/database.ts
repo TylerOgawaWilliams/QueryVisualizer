@@ -48,7 +48,13 @@ export class Database {
     try {
       const explain_query = `EXPLAIN (ANALYZE, FORMAT JSON) ${query}`;
       const result = await this.pool.query(explain_query);
-      return result.rows[0]["QUERY PLAN"][0];
+
+      const plan_wrapper = result.rows[0]["QUERY PLAN"][0];
+      const actual_plan = plan_wrapper.Plan;
+
+      console.log("Extracted plan:", JSON.stringify(actual_plan, null, 2));
+
+      return actual_plan;
     } catch (error) {
       throw new Error(
         error instanceof Error ? error.message : "Unknown explain error",

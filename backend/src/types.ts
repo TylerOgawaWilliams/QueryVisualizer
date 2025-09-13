@@ -15,6 +15,7 @@ export interface PlanNode {
   "Join Type"?: string;
   "Hash Cond"?: string;
   "Sort Key"?: string[];
+  "Join Filter"?: string;
 }
 
 export interface ExplainRequest {
@@ -23,7 +24,23 @@ export interface ExplainRequest {
 
 export interface ExplainResponse {
   success: boolean;
-  plan?: any;
+  plan?: {
+    tree: any;
+    nodes: any[];
+    links: Array<{ source: string; target: string }>;
+    stats: {
+      maxCost: number;
+      minCost: number;
+      maxRows: number;
+      minRows: number;
+      maxActualRows: number;
+      avgCost: number;
+      totalCost: number;
+    };
+    executionOrder: any[];
+    bottlenecks: any[];
+    originalQuery: string;
+  };
   error?: string;
 }
 
