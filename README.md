@@ -1,3 +1,5 @@
+# QVIZ: SQL Query Vizualizer:
+
 ## Running the backend
 
 #### 1. Setup Docker for the Database
