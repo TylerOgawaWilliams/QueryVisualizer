@@ -1,7 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query'
+import { useCallback, useEffect } from 'react';
 import ReactFlow, {
-  MiniMap,
   Controls,
   Background,
   useNodesState,
@@ -13,11 +11,14 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import './queryTree.css'
 import { fetchGraph } from '../../helpers/api';
-import type { Graph } from '../../types';
+import { SeqScanNode, SourceNode } from './Nodes';
+
+const nodeTypes = {
+    source: SourceNode,
+    seq_scan: SeqScanNode
+}
 
 export function QueryTree() {
-  // const [graph, setGraph] = useState();
-
   useEffect(() => {
     async function graph() {
       const { graph } = await fetchGraph();
@@ -41,10 +42,10 @@ export function QueryTree() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
+            nodeTypes={nodeTypes}
         >
-        <MiniMap />
-        <Controls />
-        <Background />
+          <Controls />
+          <Background />
         </ReactFlow>
     </div>
   );

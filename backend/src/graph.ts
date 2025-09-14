@@ -39,7 +39,7 @@ export class QueryGraph {
     static createSeqScanNode(node_info: NodeInfo) : Node {
         const data : SeqScanNodeData = {
             depth: node_info.depth,
-            name: node_info.relationName,
+            name: 'Seq Scan',
             columns: node_info.output
         }
 
