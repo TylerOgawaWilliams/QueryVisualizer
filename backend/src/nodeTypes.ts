@@ -73,6 +73,22 @@ export interface SeqScanNodeData extends NodeData {
   columns?: string[];
 }
 
+export interface IndexScanNodeData extends NodeData {
+  columns?: string[];
+}
+
+export interface MemoizeNodeData extends NodeData {
+  columns?: string[];
+}
+
+export interface MaterializeNodeData extends NodeData {
+  columns?: string[];
+}
+
+export interface NestedLoopNodeData extends NodeData {
+  columns?: string[];
+}
+
 export enum NodeType {
   SOURCE = "source",
   SEQ_SCAN = "seq_scan",
