@@ -1,6 +1,67 @@
 .query-tree {
-    margin-left: auto;
-    display: flex;
-    width: 50vw;
-    height: 100vh;
+    flex: 1;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin: 0 15px 15px 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.query-tree .react-flow {
+    background-color: #fafafa;
+}
+
+.query-tree .react-flow__node {
+    background-color: #78b281;
+    border: 2px solid #5a9a65;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.query-tree .react-flow__node:hover {
+    background-color: #6ba073;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.query-tree .react-flow__edge-path {
+    stroke: #ea5039;
+    stroke-width: 2;
+}
+
+.query-tree .react-flow__edge:hover .react-flow__edge-path {
+    stroke: #d43d26;
+    stroke-width: 3;
+}
+
+.query-tree .react-flow__controls {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.query-tree .react-flow__controls-button {
+    background-color: #f8f9fa;
+    border: none;
+    color: #333;
+}
+
+.query-tree .react-flow__controls-button:hover {
+    background-color: #e9ecef;
+}
+
+.query-tree .react-flow__minimap {
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.query-tree .react-flow__background {
+    background-color: #f8f9fa;
 }

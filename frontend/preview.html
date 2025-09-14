@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qviz - Query Visualizer (Functional Website)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #f4e6cf;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* App Layout - Figma-inspired but functional */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            background-color: #f4e6cf;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Header */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
+            background-color: #1f292a;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-container {
+            width: 80px;
+            height: 30px;
+            background-color: #828574;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #828574;
+            padding: 4px;
+        }
+
+        .logo-svg {
+            width: 100%;
+            height: 100%;
+            max-width: 72px;
+            max-height: 22px;
+        }
+
+        .logo-svg .cls-1,
+        .logo-svg .cls-2 {
+            fill: white;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+        }
+
+        .nav-tab {
+            background-color: #85a4a7;
+            color: white;
+            padding: 8px 16px;
+            font-size: 14px;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            border: 1px solid #85a4a7;
+            border-bottom: none;
+            min-width: 60px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .nav-tab.active {
+            background-color: #5e777a;
+            border-color: #85a4a7;
+        }
+
+        .nav-tab:hover:not(.active) {
+            background-color: #95b5b9;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .header-icon {
+            width: 35px;
+            height: 30px;
+            background-color: #d14945;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            border: 1px solid #d14945;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .header-icon:hover {
+            background-color: #b83d35;
+        }
+
+        /* Main Content Area */
+        .app-main {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 60px);
+        }
+
+        /* Sidebar */
+        .app-sidebar {
+            width: 250px;
+            background-color: #415254;
+            position: relative;
+            z-index: 5;
+            border-right: 2px solid #82989b;
+        }
+
+        .sidebar-content {
+            padding: 20px;
+            height: 100%;
+        }
+
+        .database-info {
+            color: white;
+        }
+
+        .db-header {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #95b5b9;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .db-tables {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .table-item {
+            background-color: #95b5b9;
+            color: #415254;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .table-item:hover {
+            background-color: #85a4a7;
+            transform: translateX(4px);
+            border-color: #78b281;
+        }
+
+        .table-item.active {
+            background-color: #78b281;
+            color: white;
+            border-color: #5a9a65;
+        }
+
+        /* Content Area */
+        .app-content {
+            flex: 1;
+            background-color: #f4e6cf;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Query Input Area */
+        .query-input {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-family: 'Courier New', monospace;
+            min-height: 200px;
+        }
+
+        .query-input-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .query-input-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .query-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .run-button {
+            background-color: #78b281;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .run-button:hover {
+            background-color: #6ba073;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(120, 178, 129, 0.3);
+        }
+
+        .clear-button {
+            background-color: #ea5039;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .clear-button:hover {
+            background-color: #d43d26;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(234, 80, 57, 0.3);
+        }
+
+        .query-textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+            transition: all 0.2s;
+            background-color: #fafafa;
+        }
+
+        .query-textarea:focus {
+            border-color: #78b281;
+            box-shadow: 0 0 0 3px rgba(120, 178, 129, 0.1);
+            background-color: white;
+        }
+
+        .query-textarea::placeholder {
+            color: #999;
+            font-style: italic;
+        }
+
+        /* Query Tree Area */
+        .query-tree {
+            flex: 1;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 16px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .query-tree::before {
+            content: "Query Tree Visualization";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #666;
+            font-size: 18px;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .query-tree::after {
+            content: "ReactFlow will render here";
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #999;
+            font-size: 14px;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .app-sidebar {
+                width: 200px;
+            }
+            
+            .app-content {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .app-main {
+                flex-direction: column;
+            }
+            
+            .app-sidebar {
+                width: 100%;
+                height: 120px;
+            }
+            
+            .sidebar-content {
+                padding: 15px;
+            }
+            
+            .db-tables {
+                flex-direction: row;
+                gap: 8px;
+                overflow-x: auto;
+            }
+            
+            .table-item {
+                flex: 1;
+                text-align: center;
+                padding: 8px 12px;
+                font-size: 12px;
+                min-width: 80px;
+            }
+            
+            .app-content {
+                padding: 10px;
+                gap: 15px;
+            }
+            
+            .query-input {
+                padding: 15px;
+            }
+            
+            .query-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .run-button, .clear-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-header {
+                height: 50px;
+                padding: 0 10px;
+            }
+            
+            .logo-container {
+                width: 60px;
+                height: 25px;
+            }
+            
+            .logo-svg {
+                max-width: 52px;
+                max-height: 17px;
+            }
+            
+            .nav-tab {
+                padding: 6px 12px;
+                font-size: 12px;
+                min-width: 50px;
+            }
+            
+            .header-icon {
+                width: 30px;
+                height: 25px;
+                font-size: 12px;
+            }
+            
+            .query-input-header h3 {
+                font-size: 16px;
+            }
+            
+            .query-textarea {
+                font-size: 13px;
+                min-height: 100px;
+            }
+        }
+
+        /* Focus states for accessibility */
+        .nav-tab:focus,
+        .table-item:focus,
+        .run-button:focus,
+        .clear-button:focus {
+            outline: 2px solid #78b281;
+            outline-offset: 2px;
+        }
+
+        /* Smooth transitions */
+        * {
+            transition: all 0.2s ease;
+        }
+
+        .description {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            max-width: 300px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="description">
+        <strong>Preview of the Query Visualizer</strong><br>
+        This is a non-functional preview of the Query Visualizer.
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-container">
+                    <svg class="logo-svg" viewBox="0 0 369.02 324.42" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <style>
+                                .cls-1 {
+                                    font-family: OCRAStd, 'OCR A Std';
+                                    font-size: 290.79px;
+                                    fill: #828574;
+                                }
+                                .cls-2 {
+                                    font-family: OCRAbyBT-Regular, 'OCR-A BT';
+                                    font-size: 82.84px;
+                                    fill: #828574;
+                                }
+                            </style>
+                        </defs>
+                        <text class="cls-1" transform="translate(8 262.57)"><tspan x="0" y="0">Q</tspan></text>
+                        <text class="cls-2" transform="translate(184.51 262.57)"><tspan x="0" y="0">VIZ</tspan></text>
+                    </svg>
+                </div>
+                <div class="nav-tabs">
+                    <div class="nav-tab active">Demo</div>
+                    <div class="nav-tab">445</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="header-icon">Q</div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="app-main">
+            <!-- Sidebar -->
+            <aside class="app-sidebar">
+                <div class="sidebar-content">
+                    <div class="database-info">
+                        <div class="db-header">Database</div>
+                        <div class="db-tables">
+                            <div class="table-item active">Tables</div>
+                            <div class="table-item">Views</div>
+                            <div class="table-item">Functions</div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="app-content">
+                <div class="query-input">
+                    <div class="query-input-header">
+                        <h3>SQL Query</h3>
+                        <div class="query-actions">
+                            <button class="run-button">Run Query</button>
+                            <button class="clear-button">Clear</button>
+                        </div>
+                    </div>
+                    <textarea 
+                        class="query-textarea"
+                        placeholder="Enter your SQL query here..."
+                        rows="4"
+                    >SELECT u.name, p.title, c.name as category
+FROM users u
+JOIN posts p ON u.id = p.user_id
+JOIN categories c ON p.category_id = c.id
+WHERE u.active = true
+ORDER BY p.created_at DESC;</textarea>
+                </div>
+                <div class="query-tree">
+                    <!-- ReactFlow will be rendered here -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Add some basic interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab switching
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Table item selection
+            const tableItems = document.querySelectorAll('.table-item');
+            tableItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    tableItems.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Button interactions
+            const runButton = document.querySelector('.run-button');
+            const clearButton = document.querySelector('.clear-button');
+            const textarea = document.querySelector('.query-textarea');
+
+            runButton.addEventListener('click', function() {
+                alert('Query executed! (This is a demo)');
+            });
+
+            clearButton.addEventListener('click', function() {
+                textarea.value = '';
+                textarea.focus();
+            });
+
+            // Add some hover effects
+            const headerIcon = document.querySelector('.header-icon');
+            headerIcon.addEventListener('click', function() {
+                alert('Settings clicked! (This is a demo)');
+            });
+        });
+    </script>
+</body>
+</html>
