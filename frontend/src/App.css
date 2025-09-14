@@ -1,0 +1,473 @@
+/* App Layout - Figma-inspired but functional */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: #f4e6cf;
+  font-family: 'Courier New', monospace;
+}
+
+/* Header */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 60px;
+  background-color: #1f292a;
+  padding: 0 20px;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo-container {
+  width: 80px;
+  height: 30px;
+  background-color: #828574;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #828574;
+  padding: 4px;
+}
+
+.logo-svg {
+  width: 100%;
+  height: 100%;
+  max-width: 72px;
+  max-height: 22px;
+}
+
+.logo-svg .cls-1,
+.logo-svg .cls-2 {
+  fill: white;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 0;
+}
+
+.nav-tab {
+  background-color: #85a4a7;
+  color: white;
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  border: 1px solid #85a4a7;
+  border-bottom: none;
+  min-width: 60px;
+  text-align: center;
+  transition: all 0.2s;
+}
+
+.nav-tab.active {
+  background-color: #5e777a;
+  border-color: #85a4a7;
+}
+
+.nav-tab:hover:not(.active) {
+  background-color: #95b5b9;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+}
+
+.header-icon {
+  width: 35px;
+  height: 30px;
+  background-color: #d14945;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: 1px solid #d14945;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.header-icon:hover {
+  background-color: #b83d35;
+}
+
+/* Main Content Area */
+.app-main {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 60px);
+}
+
+/* Sidebar */
+.app-sidebar {
+  width: 250px;
+  background-color: #415254;
+  position: relative;
+  z-index: 5;
+  border-right: 2px solid #82989b;
+}
+
+.sidebar-content {
+  padding: 20px;
+  height: 100%;
+}
+
+.database-info {
+  color: white;
+}
+
+.db-header {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  color: #95b5b9;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.db-tables {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.table-item {
+  background-color: #95b5b9;
+  color: #415254;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+  border: 1px solid transparent;
+}
+
+.table-item:hover {
+  background-color: #85a4a7;
+  transform: translateX(4px);
+  border-color: #78b281;
+}
+
+.table-item.active {
+  background-color: #78b281;
+  color: white;
+  border-color: #5a9a65;
+}
+
+/* Content Area */
+.app-content {
+  flex: 1;
+  background-color: #f4e6cf;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 20px;
+  gap: 20px;
+}
+
+/* Query Input Area */
+.query-input {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  font-family: 'Courier New', monospace;
+  min-height: 200px;
+}
+
+.query-input-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.query-input-header h3 {
+  margin: 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.query-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.run-button {
+  background-color: #78b281;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.run-button:hover {
+  background-color: #6ba073;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(120, 178, 129, 0.3);
+}
+
+.clear-button {
+  background-color: #ea5039;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.clear-button:hover {
+  background-color: #d43d26;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(234, 80, 57, 0.3);
+}
+
+.query-textarea {
+  width: 100%;
+  min-height: 120px;
+  border: 2px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 15px;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  resize: vertical;
+  outline: none;
+  transition: all 0.2s;
+  background-color: #fafafa;
+}
+
+.query-textarea:focus {
+  border-color: #78b281;
+  box-shadow: 0 0 0 3px rgba(120, 178, 129, 0.1);
+  background-color: white;
+}
+
+.query-textarea::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+/* Query Tree Area */
+.query-tree {
+  flex: 1;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+/* ReactFlow Styling */
+.query-tree .react-flow {
+  background-color: #fafafa;
+}
+
+.query-tree .react-flow__node {
+  background-color: #78b281;
+  border: 2px solid #5a9a65;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-width: 120px;
+}
+
+.query-tree .react-flow__node:hover {
+  background-color: #6ba073;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+.query-tree .react-flow__edge-path {
+  stroke: #ea5039;
+  stroke-width: 3;
+}
+
+.query-tree .react-flow__edge:hover .react-flow__edge-path {
+  stroke: #d43d26;
+  stroke-width: 4;
+}
+
+.query-tree .react-flow__controls {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.query-tree .react-flow__controls-button {
+  background-color: #f8f9fa;
+  border: none;
+  color: #333;
+  transition: background-color 0.2s;
+}
+
+.query-tree .react-flow__controls-button:hover {
+  background-color: #e9ecef;
+}
+
+.query-tree .react-flow__minimap {
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.query-tree .react-flow__background {
+  background-color: #f8f9fa;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .app-sidebar {
+    width: 200px;
+  }
+  
+  .app-content {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-main {
+    flex-direction: column;
+  }
+  
+  .app-sidebar {
+    width: 100%;
+    height: 120px;
+  }
+  
+  .sidebar-content {
+    padding: 15px;
+  }
+  
+  .db-tables {
+    flex-direction: row;
+    gap: 8px;
+    overflow-x: auto;
+  }
+  
+  .table-item {
+    flex: 1;
+    text-align: center;
+    padding: 8px 12px;
+    font-size: 12px;
+    min-width: 80px;
+  }
+  
+  .app-content {
+    padding: 10px;
+    gap: 15px;
+  }
+  
+  .query-input {
+    padding: 15px;
+  }
+  
+  .query-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .run-button, .clear-button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    height: 50px;
+    padding: 0 10px;
+  }
+  
+  .logo-container {
+    width: 60px;
+    height: 25px;
+  }
+  
+  .logo-svg {
+    max-width: 52px;
+    max-height: 17px;
+  }
+  
+  .nav-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 50px;
+  }
+  
+  .header-icon {
+    width: 30px;
+    height: 25px;
+    font-size: 12px;
+  }
+  
+  .query-input-header h3 {
+    font-size: 16px;
+  }
+  
+  .query-textarea {
+    font-size: 13px;
+    min-height: 100px;
+  }
+}
+
+/* Loading and empty states */
+.query-tree:empty::before {
+  content: "Query Tree Visualization";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #666;
+  font-size: 16px;
+  font-style: italic;
+}
+
+/* Focus states for accessibility */
+.nav-tab:focus,
+.table-item:focus,
+.run-button:focus,
+.clear-button:focus {
+  outline: 2px solid #78b281;
+  outline-offset: 2px;
+}
+
+/* Smooth transitions */
+* {
+  transition: all 0.2s ease;
+}

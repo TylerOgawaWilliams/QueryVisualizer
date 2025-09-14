@@ -2,6 +2,8 @@
 
 #### 1. Setup Docker for the Database
 
+1.1
+
 ```
 docker run --name postgres-dev \
   -e POSTGRES_PASSWORD=password \
@@ -10,33 +12,52 @@ docker run --name postgres-dev \
   -d postgres:15
 ```
 
+1.2
+
 ```
 docker cp dvdrental.tar postgres-dev:/tmp/backup.tar
 ```
 
+1.3
+
+```
+
 docker exec -it postgres-dev psql -U postgres -c "CREATE DATABASE dvdrental;"
-```
 
 ```
+
+1.4
+
+```
+
 docker exec -it postgres-dev pg_restore -U postgres -d dvdrental -v /tmp/backup.tar
-```
 
 ```
+
+1.5
+
+```
+
 docker exec -it postgres-dev psql -U postgres -d dvdrental
+
 ```
 
-#### 2 Running the server
+#### 2. Running the server
 
 Check dependencies are installed
 
 ```
+
 npm i
+
 ```
 
 Run the server
 
 ```
+
 npm run dev
+
 ```
 
 ## Running the frontend
@@ -44,13 +65,17 @@ npm run dev
 Check dependencies are installed
 
 ```
+
 npm i
+
 ```
 
 Run the server
 
 ```
+
 npm run dev
+
 ```
 
 ## Useful Links
