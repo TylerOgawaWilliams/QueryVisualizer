@@ -1,4 +1,4 @@
-import { PlanNode, NodeInfo } from "./types";
+import { PlanNode, NodeInfo } from "./nodeTypes";
 
 export class PlanParser {
   private static nodeCounter = 0;
@@ -76,7 +76,7 @@ export class PlanParser {
     traverse(root_node);
     return execution_order;
   }
-  
+
   static getNodeStats(nodes: NodeInfo[]) {
     const costs = nodes.map((n) => n.totalCost).filter((c) => c > 0);
     const rows = nodes.map((n) => n.planRows).filter((r) => r > 0);

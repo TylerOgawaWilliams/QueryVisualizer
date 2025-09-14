@@ -16,28 +16,67 @@ docker run --name postgres-dev \
 
 ```
 docker cp dvdrental.tar postgres-dev:/tmp/backup.tar
+```
 
 1.3
+
+```
+
 docker exec -it postgres-dev psql -U postgres -c "CREATE DATABASE dvdrental;"
+
 ```
 
 1.4
 
 ```
+
 docker exec -it postgres-dev pg_restore -U postgres -d dvdrental -v /tmp/backup.tar
+
 ```
 
 1.5
 
 ```
+
 docker exec -it postgres-dev psql -U postgres -d dvdrental
+
 ```
 
-#### 2
+#### 2. Running the server
+
+Check dependencies are installed
+
+```
+
+npm i
+
+```
+
+Run the server
+
+```
+
+npm run dev
+
+```
 
 ## Running the frontend
 
-#### 1
+Check dependencies are installed
+
+```
+
+npm i
+
+```
+
+Run the server
+
+```
+
+npm run dev
+
+```
 
 ## Useful Links
 

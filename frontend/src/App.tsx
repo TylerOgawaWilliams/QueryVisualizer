@@ -1,6 +1,8 @@
 import { QueryInput } from './components/QueryInput/QueryInput'
 import { QueryTree } from './components/QueryTree/QueryTree'
+
 import './App.css'
+
 
 function App() {
   return (
