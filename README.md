@@ -42,7 +42,7 @@ docker exec -it postgres-dev psql -U postgres -d dvdrental
 
 ```
 
-#### 2 Running the server
+#### 2. Running the server
 
 Check dependencies are installed
 
