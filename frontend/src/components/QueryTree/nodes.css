@@ -1,0 +1,16 @@
+.node {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    color: black;
+    gap: 0.15em;
+    padding: 0.5em;
+    border-radius: 20px;
+}
+
+.node h1 {
+    font-size: large;
+    background: #acc9ff;
+    border-radius: 10px;
+    padding-inline: 0.5em;
+}

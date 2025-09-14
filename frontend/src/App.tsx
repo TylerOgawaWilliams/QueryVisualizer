@@ -1,8 +1,7 @@
+import { ReactFlowProvider } from 'reactflow';
 import { QueryInput } from './components/QueryInput/QueryInput'
 import { QueryTree } from './components/QueryTree/QueryTree'
-
 import './App.css'
-
 
 function App() {
   return (
@@ -58,8 +57,10 @@ function App() {
 
         {/* Content Area */}
         <main className="app-content">
-          <QueryInput />
-          <QueryTree />
+          <ReactFlowProvider>
+            <QueryInput />
+            <QueryTree />
+          </ReactFlowProvider>
         </main>
       </div>
     </div>

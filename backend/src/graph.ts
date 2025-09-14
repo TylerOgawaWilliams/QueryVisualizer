@@ -38,12 +38,12 @@ export class QueryGraph {
     return node;
   }
 
-  static createSeqScanNode(node_info: NodeInfo): Node {
-    const data: SeqScanNodeData = {
-      depth: node_info.depth,
-      name: node_info.relationName,
-      columns: node_info.output,
-    };
+  static createSeqScanNode(node_info: NodeInfo) : Node {
+    const data : SeqScanNodeData = {
+        depth: node_info.depth,
+        name: 'Seq Scan',
+        columns: node_info.output
+    }
 
     const node: Node = {
       id: node_info.id,
