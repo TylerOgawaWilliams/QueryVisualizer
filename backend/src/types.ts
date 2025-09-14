@@ -1,23 +1,3 @@
-export interface PlanNode {
-  "Node Type": string;
-  "Total Cost": number;
-  "Relation Name"?: string;
-  "Startup Cost": number;
-  "Plan Rows": number;
-  "Plan Width": number;
-  "Actual Total Time"?: number;
-  "Actual Startup Time"?: number;
-  "Actual Rows"?: number;
-  "Actual Loops"?: number;
-  Plans?: PlanNode[];
-  Filter?: string;
-  "Index Name"?: string;
-  "Join Type"?: string;
-  "Hash Cond"?: string;
-  "Sort Key"?: string[];
-  "Join Filter"?: string;
-}
-
 export interface ExplainRequest {
   query: string;
 }
@@ -44,6 +24,15 @@ export interface ExplainResponse {
   error?: string;
 }
 
+export interface GraphRequest {
+  query: string;
+}
+
+export interface GraphResponse {
+  graph: Graph;
+  error: boolean | string;
+}
+
 export interface SampleQuery {
   name: string;
   query: string;
@@ -55,20 +44,6 @@ export interface ExecuteResponse {
   rowCount?: number;
   fields?: Array<{ name: string; dataType: number }>;
   error?: string;
-}
-
-export interface Node {
-  id: string;
-  type: NodeType;
-  position: {
-    x: number;
-    y: number;
-  };
-  data: any;
-}
-
-export interface NodeType {
-  "seq-scan": string;
 }
 
 export interface DatabaseUploadRequest {

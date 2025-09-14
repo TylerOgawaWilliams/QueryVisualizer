@@ -1,18 +1,20 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { Pool, PoolClient } from "pg";
 import { Database } from "./database";
-import { PlanParser, NodeInfo } from "./planParser";
+import { PlanParser } from "./planParser";
 import { upload } from "./upload";
+import { NodeInfo } from "./nodeTypes";
 import {
   ExplainRequest,
   ExplainResponse,
   SampleQuery,
   ExecuteResponse,
+  GraphResponse,
   DatabaseUploadResponse,
   DatabaseUploadRequest,
   CurrentDatabaseResponse,
 } from "./types";
+import { QueryGraph } from "./graph";
 
 const app = express();
 app.use(cors());
@@ -36,6 +38,38 @@ app.get("/api/test-query", (req: Request, res: Response<SampleQuery[]>) => {
 
   res.json(test_query);
   console.log("Success!");
+});
+
+app.post("/api/query-graph", async (req: Request, res: Response) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({
+      success: false,
+      error: "Query is required",
+    });
+  }
+
+  try {
+    const raw_plan = await db.explainQuery(query);
+    console.log("Raw Query Plan recieved: ", JSON.stringify(raw_plan, null, 2));
+    const parsed_plan = PlanParser.parsePlan(raw_plan);
+    const execution_order = PlanParser.getExecutionOrder(parsed_plan);
+    const source_nodes = await db.sourceNodeInfo(execution_order);
+    const graph = QueryGraph.getGraph(execution_order, source_nodes);
+    const resp: GraphResponse = {
+      graph: graph,
+      error: false,
+    };
+
+    res.json(resp);
+  } catch (e) {
+    console.error("Query execution error:", e);
+    res.status(500).json({
+      success: false,
+      error: e instanceof Error ? e.message : "Unknown error",
+    });
+  }
 });
 
 app.post(
@@ -125,7 +159,8 @@ app.post(
     req: Request<{}, DatabaseUploadResponse, DatabaseUploadRequest>,
     res: Response<DatabaseUploadResponse>,
   ) => {
-    if (!req.file) {
+    const file = req.file as Express.Multer.File;
+    if (!file) {
       return res.status(400).json({
         success: false,
         error: "No db file uploaded",
@@ -135,11 +170,11 @@ app.post(
     const { databaseName } = req.body;
 
     try {
-      const result = await db.replaceDatabase(req.file.path, databaseName);
+      const result = await db.replaceDatabase(file.path, databaseName);
       res.json({
         success: true,
         message: result,
-        filename: req.file.originalname,
+        filename: file.originalname,
       });
     } catch (error) {
       console.error("Database Upload error: ", error);
@@ -172,3 +207,6 @@ process.on("SIGINT", async () => {
   await db.close();
   process.exit(0);
 });
+function sourceNodeInfo(execution_order: NodeInfo[]) {
+  throw new Error("Function not implemented.");
+}
