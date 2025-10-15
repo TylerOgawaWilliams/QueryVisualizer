@@ -18,16 +18,17 @@ const nodeTypes = {
     seq_scan: SeqScanNode
 }
 
-export function QueryTree() {
+export function QueryTree({ query } : { query : string }) {
   useEffect(() => {
+    if (query === "") return;
     async function graph() {
-      const { graph } = await fetchGraph();
+      const { graph } = await fetchGraph(query);
       setNodes(graph.nodes);
       setEdges(graph.edges);
     }   
     
     graph();
-  }, [])
+  }, [query])
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);

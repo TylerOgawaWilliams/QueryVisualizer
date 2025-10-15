@@ -2,15 +2,16 @@ import { runQuery, fetchGraph } from "../../helpers/api";
 import "./queryInput.css"
 import React, { useState } from 'react';
 
-export function QueryInput() {
+export function QueryInput({ setQuery } : { setQuery : any }) {
     const [queryTextInput, setQueryTextInput ] = useState('');
 
     const OnRunQuery = async () => {
         try {
-            const resp = await fetchGraph(queryTextInput);
-            console.log("Successfully ran query: ");
-            console.log(queryTextInput);
-            console.log("Response: ", resp);
+            setQuery(queryTextInput);
+            // const resp = await fetchGraph(queryTextInput);
+            // console.log("Successfully ran query: ");
+            // console.log(queryTextInput);
+            // console.log("Response: ", resp);
         } catch (e) { throw e; }
 
     }

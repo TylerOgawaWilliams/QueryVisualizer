@@ -3,8 +3,11 @@ import { QueryInput } from './components/QueryInput/QueryInput'
 import { QueryTree } from './components/QueryTree/QueryTree'
 import './App.css'
 import { Sidebar } from './components/Sidebar/Sidebar';
+import { useState } from 'react';
 
 function App() {
+  const [query, setQuery] = useState("");
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -47,8 +50,8 @@ function App() {
         {/* Content Area */}
         <main className="app-content">
           <ReactFlowProvider>
-            <QueryInput />
-            <QueryTree />
+            <QueryInput setQuery={setQuery} />
+            <QueryTree query={query} />
           </ReactFlowProvider>
         </main>
       </div>
