@@ -32,7 +32,6 @@ function App() {
           </div>
           <div className="nav-tabs">
             <div className="nav-tab active">Demo</div>
-            <div className="nav-tab">445</div>
           </div>
         </div>
         <div className="header-right">
