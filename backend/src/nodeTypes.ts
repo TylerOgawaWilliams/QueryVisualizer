@@ -11,6 +11,8 @@ export interface PlanNode {
   "Actual Loops"?: number;
   Plans?: PlanNode[];
   Filter?: string;
+  "Index Cond"?: string;
+  "Rows Removed by Filter"?: number;
   "Index Name"?: string;
   "Join Type"?: string;
   "Hash Cond"?: string;
@@ -31,18 +33,27 @@ export interface NodeInfo {
   actualTime?: number;
   children: NodeInfo[];
   filter?: string;
+  indexCond?: string;
+  removedRows?: number;
   indexName?: string;
   joinType?: string;
   depth: number;
   output?: string[];
 }
 
-export interface SourceNodeInfo {
+export interface Attribute {
+  name: string;
+  type: string;
+  keyType: "PK" | "FK" | undefined;
+}
+
+export interface TableNodeInfo {
   id: string;
   targetNode: string;
   relationName: string;
-  columns: string[];
+  columns: Attribute[];
   depth: number;
+  rowCount: number;
 }
 
 export interface Graph {
@@ -73,19 +84,23 @@ export interface NodeData {
 }
 
 export interface TableNodeData extends NodeData {
-  sources: string[];
-  columns: string[];
+  attributes: Attribute[];
+  rowCount: number;
 }
 
+/* --Scan Nodes-- */
 export interface ScanNodeData extends NodeData {
-  scanType: string;
-  columns?: string[];
+  startUpCost: number;
+  totalCost: number;
+  filter?: string;
+  indexCond?: string;
   table: TableNodeData;
 }
+/* ---------- */
 
 export enum NodeType {
-  TABLE = "table",
-  SCAN = "scan",
-  JOIN = "join",
-  NONE = "none",
+  TABLE = "Table",
+  SCAN = "Scan",
+  JOIN = "Join",
+  NONE = "None",
 }
