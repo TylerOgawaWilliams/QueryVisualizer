@@ -1,4 +1,4 @@
-import { runQuery } from "../../helpers/api";
+import { runQuery, fetchGraph } from "../../helpers/api";
 import "./queryInput.css"
 import React, { useState } from 'react';
 
@@ -7,7 +7,7 @@ export function QueryInput() {
 
     const OnRunQuery = async () => {
         try {
-            const resp = await runQuery(queryTextInput);
+            const resp = await fetchGraph(queryTextInput);
             console.log("Successfully ran query: ");
             console.log(queryTextInput);
             console.log("Response: ", resp);

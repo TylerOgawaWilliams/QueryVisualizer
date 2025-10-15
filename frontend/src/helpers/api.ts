@@ -1,8 +1,6 @@
 import { API_URL } from "../globals";
 
-export async function fetchGraph() {
-    const query = 'SELECT actor_id FROM actor;';
-
+export async function fetchGraph(query: string) {
     const URL = API_URL + 'query-graph';
     const response = await fetch(URL, {
         method: 'POST',
