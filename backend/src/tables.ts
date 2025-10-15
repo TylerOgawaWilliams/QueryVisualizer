@@ -104,6 +104,11 @@ export class Tables {
                         type: r.data_type,
                         keyType: keyType
                     }
+                    console.log("Attribute: ", attribute);
+                    console.log("Relation name: ", n.relationName);
+                    if(!this.keyTypes[n.relationName!]) {
+                        this.keyTypes[n.relationName!] = {};
+                    }
                     
                     this.keyTypes[n.relationName!][r.column_name] = r.data_type;
                     return attribute;
