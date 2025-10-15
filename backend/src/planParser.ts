@@ -29,6 +29,8 @@ export class PlanParser {
       actualTime: node["Actual Total Time"],
       children: [],
       filter: node.Filter || node["Join Filter"],
+      indexCond: node["Index Cond"],
+      removedRows: node["Rows Removed by Filter"],
       indexName: node["Index Name"],
       joinType: node["Join Type"],
       output: node["Output"],

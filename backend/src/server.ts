@@ -15,6 +15,7 @@ import {
   CurrentDatabaseResponse,
 } from "./types";
 import { QueryGraph } from "./graph";
+import { Tables } from "./tables";
 
 const app = express();
 app.use(cors());
@@ -55,8 +56,14 @@ app.post("/api/query-graph", async (req: Request, res: Response) => {
     console.log("Raw Query Plan recieved: ", JSON.stringify(raw_plan, null, 2));
     const parsed_plan = PlanParser.parsePlan(raw_plan);
     const execution_order = PlanParser.getExecutionOrder(parsed_plan);
-    const source_nodes = await db.sourceNodeInfo(execution_order);
-    const graph = QueryGraph.getGraph(execution_order, source_nodes);
+
+    const tables = new Tables(execution_order);
+    await tables.init();
+    const source_nodes = tables.getTableNodes();
+
+    const queryGraph = new QueryGraph(tables);
+    const graph = queryGraph.getGraph(execution_order, source_nodes);
+    
     const resp: GraphResponse = {
       graph: graph,
       error: false,

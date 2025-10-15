@@ -5,28 +5,40 @@ import {
   NodeType,
   ScanNodeData,
   Graph,
-  SourceNodeInfo,
+  TableNodeInfo,
   TableNodeData,
+  Attribute,
 } from "./nodeTypes";
+import { Tables } from "./tables";
 
 export class QueryGraph {
   private static default_pos = { x: 0, y: 0 };
+  private tables: Tables;
 
-  static getNodeType(node_info: NodeInfo): NodeType {
+  constructor(tables: Tables) {
+    this.tables = tables;
+  }
+
+  private getNodeType(node_info: NodeInfo): NodeType {
     switch (node_info.nodeType) {
       case "Seq Scan":
+      case "Index Scan": 
+      case "Index Only Scan":
+      case "Bitmap Index Scan":
+      case "Bitmap Heap Scan": 
         return NodeType.SCAN;
       default:
+        if (node_info.nodeType.includes("Scan")) return NodeType.SCAN;
         return NodeType.NONE;
     }
   }
 
-  static createSourceNode(node_info: SourceNodeInfo): Node {
+  private createTableNode(node_info: TableNodeInfo): Node {    
     const data: TableNodeData = {
       depth: node_info.depth,
       name: node_info.relationName,
-      columns: node_info.columns,
-      sources: [],
+      attributes: node_info.columns,
+      rowCount: node_info.rowCount,
     };
 
     const node: Node = {
@@ -39,13 +51,41 @@ export class QueryGraph {
     return node;
   }
 
-  static createSeqScanNode(node_info: NodeInfo) : Node {
+  private createScanNode(node_info: NodeInfo) : Node {
+    const attributes = node_info.output?.map((col) => {
+      if (!node_info.relationName) {
+        return { name: col, type: "", keyType: undefined }
+      }
+
+      const type = this.tables.getKeyType(node_info.relationName, col);
+      const isPk = this.tables.isPrimaryKey(node_info.relationName, col);
+      const isFk = this.tables.isForeignKey(node_info.relationName, col);
+
+      const attribute : Attribute = {
+        name: col,
+        type: type ?? "",
+        keyType: isPk ? "PK" : isFk ? "FK" : undefined
+      }
+
+      return attribute;
+    }) ?? [];
+    
+    const table : TableNodeData = {
+      depth: node_info.depth,
+      name : "",
+      attributes: attributes,
+      rowCount: node_info.planRows
+    }
+
     const data : ScanNodeData = {
         depth: node_info.depth,
-        name: 'Seq Scan',
-        columns: node_info.output,
-        scanType: 'Seq Scan',
-        table: { sources: [], columns: [], depth: 0, name: '' }
+        name: node_info.nodeType,
+
+        startUpCost: node_info.startupCost,
+        totalCost: node_info.totalCost,
+        filter: node_info.filter,
+        indexCond: node_info.indexCond,
+        table: table
     }
 
     const node: Node = {
@@ -58,7 +98,7 @@ export class QueryGraph {
     return node;
   }
 
-  static createEdge(source_id: string, target_id: string): Edge {
+  private createEdge(source_id: string, target_id: string): Edge {
     const edge: Edge = {
       id: `e-${source_id}-${target_id}`,
       source: source_id,
@@ -68,15 +108,15 @@ export class QueryGraph {
     return edge;
   }
 
-  static getGraph(
+  public getGraph(
     node_info: NodeInfo[],
-    source_nodes: SourceNodeInfo[],
+    table_nodes: TableNodeInfo[],
   ): Graph {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
-    for (const n of source_nodes) {
-      const node = this.createSourceNode(n);
+    for (const n of table_nodes) {
+      const node = this.createTableNode(n);
       const edge = this.createEdge(n.id, n.targetNode);
       nodes.push(node);
       edges.push(edge);
@@ -85,12 +125,11 @@ export class QueryGraph {
     for (const n of node_info) {
       switch (this.getNodeType(n)) {
         case NodeType.SCAN:
-          const seq_node = this.createSeqScanNode(n);
-          nodes.push(seq_node);
+          const scan_node = this.createScanNode(n);
+          nodes.push(scan_node);
           break;
         case NodeType.NONE:
         default:
-          // throw new Error(`Node type not yet implemented for: ${n.nodeType}`);
           console.log(`Node type not yet implemented for: ${n.nodeType}`);
       }
     }
