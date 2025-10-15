@@ -89,3 +89,18 @@ export enum NodeType {
   JOIN = "join",
   NONE = "none",
 }
+
+export interface JoinNodeData extends NodeData {
+    joinType: string;
+    innerUnique: string;
+    filter?: string;
+    rowsRemoved?: string;
+}
+
+export interface HashJoinNodeData extends JoinNodeData {
+    hashCond: string; 
+}
+
+export interface MergeJoinNodeData extends JoinNodeData {
+    mergeCond: string;
+}
