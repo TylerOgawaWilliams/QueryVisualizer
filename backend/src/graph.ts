@@ -3,10 +3,10 @@ import {
   NodeInfo,
   Edge,
   NodeType,
-  SeqScanNodeData,
+  ScanNodeData,
   Graph,
   SourceNodeInfo,
-  SourceNodeData,
+  TableNodeData,
 } from "./nodeTypes";
 
 export class QueryGraph {
@@ -15,22 +15,23 @@ export class QueryGraph {
   static getNodeType(node_info: NodeInfo): NodeType {
     switch (node_info.nodeType) {
       case "Seq Scan":
-        return NodeType.SEQ_SCAN;
+        return NodeType.SCAN;
       default:
         return NodeType.NONE;
     }
   }
 
   static createSourceNode(node_info: SourceNodeInfo): Node {
-    const data: SourceNodeData = {
+    const data: TableNodeData = {
       depth: node_info.depth,
       name: node_info.relationName,
       columns: node_info.columns,
+      sources: [],
     };
 
     const node: Node = {
       id: node_info.id,
-      type: NodeType.SOURCE,
+      type: NodeType.TABLE,
       position: QueryGraph.default_pos,
       data: data,
     };
@@ -39,15 +40,17 @@ export class QueryGraph {
   }
 
   static createSeqScanNode(node_info: NodeInfo) : Node {
-    const data : SeqScanNodeData = {
+    const data : ScanNodeData = {
         depth: node_info.depth,
         name: 'Seq Scan',
-        columns: node_info.output
+        columns: node_info.output,
+        scanType: 'Seq Scan',
+        table: { sources: [], columns: [], depth: 0, name: '' }
     }
 
     const node: Node = {
       id: node_info.id,
-      type: NodeType.SEQ_SCAN,
+      type: NodeType.SCAN,
       position: QueryGraph.default_pos,
       data: data,
     };
@@ -81,7 +84,7 @@ export class QueryGraph {
 
     for (const n of node_info) {
       switch (this.getNodeType(n)) {
-        case NodeType.SEQ_SCAN:
+        case NodeType.SCAN:
           const seq_node = this.createSeqScanNode(n);
           nodes.push(seq_node);
           break;

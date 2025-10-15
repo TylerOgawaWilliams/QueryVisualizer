@@ -1,3 +1,5 @@
+import { Graph } from "./nodeTypes";
+
 export interface ExplainRequest {
   query: string;
 }
