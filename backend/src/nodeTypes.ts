@@ -12,13 +12,14 @@ export interface PlanNode {
   Plans?: PlanNode[];
   Filter?: string;
   "Index Cond"?: string;
-  "Rows Removed by Filter"?: number;
+  "Rows Removed by Filter"?: string;
   "Index Name"?: string;
   "Join Type"?: string;
   "Hash Cond"?: string;
   "Sort Key"?: string[];
   "Join Filter"?: string;
   Output?: string[];
+  "Inner Unique"?: string; 
 }
 
 export interface NodeInfo {
@@ -34,11 +35,12 @@ export interface NodeInfo {
   children: NodeInfo[];
   filter?: string;
   indexCond?: string;
-  removedRows?: number;
+  rowsRemoved?: string;
   indexName?: string;
   joinType?: string;
   depth: number;
   output?: string[];
+  innerUnique?: string;
 }
 
 export interface Attribute {
@@ -110,6 +112,9 @@ export interface JoinNodeData extends NodeData {
     innerUnique: string;
     filter?: string;
     rowsRemoved?: string;
+    startUpCost: number;
+    totalCost: number;
+    table: TableNodeData;
 }
 
 export interface HashJoinNodeData extends JoinNodeData {
