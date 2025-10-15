@@ -50,6 +50,12 @@ export interface Graph {
   edges: Edge[];
 }
 
+export interface Edge {
+  id: string;
+  source: string;
+  target: string;
+}
+
 export interface Node {
   id: string;
   type: NodeType;
@@ -60,48 +66,26 @@ export interface Node {
   data: NodeData;
 }
 
+/* Node Types */
 export interface NodeData {
   depth: number;
-  name?: string;
+  name: string;
 }
 
-export interface SourceNodeData extends NodeData {
-  columns?: string[];
+export interface TableNodeData extends NodeData {
+  sources: string[];
+  columns: string[];
 }
 
-export interface SeqScanNodeData extends NodeData {
+export interface ScanNodeData extends NodeData {
+  scanType: string;
   columns?: string[];
-}
-
-export interface IndexScanNodeData extends NodeData {
-  columns?: string[];
-}
-
-export interface MemoizeNodeData extends NodeData {
-  columns?: string[];
-}
-
-export interface MaterializeNodeData extends NodeData {
-  columns?: string[];
-}
-
-export interface NestedLoopNodeData extends NodeData {
-  columns?: string[];
+  table: TableNodeData;
 }
 
 export enum NodeType {
-  SOURCE = "source",
-  SEQ_SCAN = "seq_scan",
-  INDEX_SCAN = "index_scan",
-  NESTED_LOOPS = "nested_loop",
-  MATERIALIZE = "materialize",
-  MEMOIZE = "memoize",
-  LIMIT = "limit",
+  TABLE = "table",
+  SCAN = "scan",
+  JOIN = "join",
   NONE = "none",
-}
-
-export interface Edge {
-  id: string;
-  source: string;
-  target: string;
 }
