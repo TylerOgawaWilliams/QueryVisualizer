@@ -6,21 +6,22 @@
     margin: 15px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     font-family: 'Courier New', monospace;
+    gap: 15px;
 }
 
 .query-input-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 15px;
     padding-bottom: 10px;
     border-bottom: 1px solid #eee;
+    flex-direction: column;
 }
 
 .query-input-header h3 {
     margin: 0;
     color: #333;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 600;
 }
 
