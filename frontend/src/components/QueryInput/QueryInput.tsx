@@ -1,21 +1,39 @@
+import { runQuery } from "../../helpers/api";
 import "./queryInput.css"
 import React, { useState } from 'react';
 
 export function QueryInput() {
     const [queryTextInput, setQueryTextInput ] = useState('');
 
-    const handleInputChange = (e) => {
+    const OnRunQuery = async () => {
+        try {
+            const resp = await runQuery(queryTextInput);
+            console.log("Successfully ran query: ");
+            console.log(queryTextInput);
+            console.log("Response: ", resp);
+        } catch (e) { throw e; }
+
+    }
+
+    const handleInputChange = (e: any) => {
         setQueryTextInput(e.target.value);
     };
+
     const clearQueryBox = () => {
         setQueryTextInput('');
     };
+
     return (
         <div className="query-input">
             <div className="query-input-header">
                 <h3>SQL Query</h3>
                 <div className="query-actions">
-                    <button className="run-button">Run Query</button>
+                    <button 
+                        className="run-button"
+                        onClick={ OnRunQuery }
+                    >
+                        Run Query
+                    </button>
                     <button className="clear-button" 
                             onClick={clearQueryBox}>Clear</button>
                 </div>
