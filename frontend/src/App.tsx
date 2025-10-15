@@ -2,6 +2,7 @@ import { ReactFlowProvider } from 'reactflow';
 import { QueryInput } from './components/QueryInput/QueryInput'
 import { QueryTree } from './components/QueryTree/QueryTree'
 import './App.css'
+import { Sidebar } from './components/Sidebar/Sidebar';
 
 function App() {
   return (
@@ -42,18 +43,7 @@ function App() {
       {/* Main Content */}
       <div className="app-main">
         {/* Sidebar */}
-        <aside className="app-sidebar">
-          <div className="sidebar-content">
-            <div className="database-info">
-              <div className="db-header">Database</div>
-              <div className="db-tables">
-                <div className="table-item">Tables</div>
-                <div className="table-item">Views</div>
-                <div className="table-item">Functions</div>
-              </div>
-            </div>
-          </div>
-        </aside>
+        <Sidebar />
 
         {/* Content Area */}
         <main className="app-content">
