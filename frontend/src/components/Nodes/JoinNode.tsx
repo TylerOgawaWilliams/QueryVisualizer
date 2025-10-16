@@ -1,21 +1,22 @@
 import { type NodeProps, Handle, Position } from "reactflow";
-import type { ScanNodeData } from "../../types";
-import "./scanNode.css"
+import type { JoinNodeData } from "../../types";
+import "./joinNode.css"
 
-export function ScanNode({ data }: NodeProps<ScanNodeData>) {
-    const getFilter = () => {
-        if (data.filter && data.indexCond) {
-            return `${data.filter} AND ${data.indexCond}`;
-        } else if (data.filter) {
-            return data.filter;
-        } else if (data.indexCond) {
-            return data.indexCond;
-        } else {
-            return undefined
+export function JoinNode({ data }: NodeProps<JoinNodeData>) {
+    const getJoinCond = () => {
+        if(data.hashCond) {
+            return data.hashCond;
+        }
+        else if(data.mergeCond) {
+            return data.mergeCond;
+        }
+        else {
+            return undefined;
         }
     }
 
-    const filter = getFilter();
+    const joinCond = getJoinCond();
+    console.log("Join Cond: ", joinCond);
 
     return (
         <>
@@ -23,8 +24,8 @@ export function ScanNode({ data }: NodeProps<ScanNodeData>) {
                 type="target"
                 position={Position.Left}
             />
-            <div className="scan node">
-                <div className="node-type"> <h3>Scan</h3> </div>
+            <div className="join node">
+                <div className="node-type"> <h3>Join</h3> </div>
                 <div className="contents">
                     <div className="name"> <h1>{data.name}</h1> </div>
                     <div className="startup-cost">
@@ -36,14 +37,13 @@ export function ScanNode({ data }: NodeProps<ScanNodeData>) {
                         <p>{data.totalCost}</p>
                     </div>
                     <div className="hline"> </div>
-                    { filter && (
-                        <div className="filter">
-                            <p>Filter: </p>
+                    {joinCond && (
+                        <div className="join-condition">
+                            <p>Join Condition: </p>
                             <div>
-                                <p><span>{filter}</span></p>
+                                <p><span>{joinCond}</span></p>
                             </div>
-                        </div>
-                    )}
+                        </div>)}
                 </div>
             </div>
             <Handle 
@@ -52,4 +52,5 @@ export function ScanNode({ data }: NodeProps<ScanNodeData>) {
             />
         </>
     )
+
 }

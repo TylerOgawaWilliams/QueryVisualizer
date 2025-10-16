@@ -1,4 +1,3 @@
-
 import { type NodeProps, Handle, Position } from "reactflow";
 import type { TableNodeData } from "../../types";
 import "./tableNode.css"

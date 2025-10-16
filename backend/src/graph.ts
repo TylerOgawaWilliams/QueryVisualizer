@@ -6,8 +6,6 @@ import {
   NodeType,
   ScanNodeData,
   JoinNodeData,
-  MergeJoinNodeData,
-  HashJoinNodeData,
   HashNodeData,
   Graph,
   TableNodeInfo,
@@ -147,6 +145,8 @@ export class QueryGraph {
         rowsRemoved: node_info.rowsRemoved ?? 'unknown',
         startUpCost: node_info.startupCost,
         totalCost: node_info.totalCost,
+        hashCond: node_info.hashCond ?? 'unknown',
+        mergeCond: node_info.mergeCond ?? 'unknown',
         table: table,
     };
 

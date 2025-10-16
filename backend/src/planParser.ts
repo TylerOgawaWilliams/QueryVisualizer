@@ -37,6 +37,8 @@ export class PlanParser {
       depth,
       parentId,
       innerUnique: node["Inner Unique"],
+      hashCond: node["Hash Cond"],
+      mergeCond: node["Merge Cond"],
     };
 
     // Recursively process children
