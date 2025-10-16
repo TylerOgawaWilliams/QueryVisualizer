@@ -11,8 +11,10 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import './queryTree.css'
 import { fetchGraph } from '../../helpers/api';
-import { TableNode, ScanNode } from './Nodes';
+import { TableNode } from '../Nodes/TableNode';
+import { ScanNode } from '../Nodes/ScanNode';
 import type { NodeType } from '../../types';
+import "../Nodes/nodes.css";
 
 const nodeTypes : { [key in NodeType]?: React.ComponentType<any> } = {
     "Table": TableNode,

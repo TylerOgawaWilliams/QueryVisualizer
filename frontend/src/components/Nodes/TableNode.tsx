@@ -1,6 +1,7 @@
+
 import { type NodeProps, Handle, Position } from "reactflow";
-import type { TableNodeData, ScanNodeData } from "../../types";
-import "./nodes.css"
+import type { TableNodeData } from "../../types";
+import "./tableNode.css"
 
 export function TableNode({ data }: NodeProps<TableNodeData>) {
     return (
@@ -50,24 +51,6 @@ export function TableNode({ data }: NodeProps<TableNodeData>) {
                     <div className="hline"> </div>
                     <p className="rowCount">row count: <span>{data.rowCount}</span></p>
                 </div>
-            </div>
-            <Handle 
-                type="source"
-                position={Position.Right}
-            />
-        </>
-    )
-}
-
-export function ScanNode({ data }: NodeProps<ScanNodeData>) {
-    return (
-        <>
-            <Handle 
-                type="target"
-                position={Position.Left}
-            />
-            <div className="node">
-                <h1>{data.name}</h1>
             </div>
             <Handle 
                 type="source"

@@ -1,43 +1,9 @@
-.node {
-    display: flex;
-    flex-direction: column;
-}
-
 .node-type {
-    margin-bottom: -0.2em;
-    font: 20px;
-    width: fit-content;
     background: #f4b4ff7a;
-    padding: 0.35em 0.5em 0.15em;
-    border-radius: 5px 5px 0 0 ;
-    border: 1.5px black solid;
-
-    h3 {
-        font-style: italic;
-        font-size: 14px;
-    }
-}
-
-.node .contents {
-    display: flex;
-    flex-direction: column;
-    background: white;
-    border: 1.5px black solid;
-    border-radius: 5px;
-    offset: -5px;
-    padding-block: 0.5em;
 }
 
 .node .name {
     background: #f4b4ff7a;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-block: 1.5px black solid;
-
-    h1 {
-        font-size: 16px;
-    }
 }
 
 .table .attributes {
