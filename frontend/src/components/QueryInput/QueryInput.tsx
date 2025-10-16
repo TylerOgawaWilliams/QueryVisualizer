@@ -1,4 +1,3 @@
-import { runQuery, fetchGraph } from "../../helpers/api";
 import "./queryInput.css"
 import React, { useState } from 'react';
 
@@ -8,12 +7,7 @@ export function QueryInput({ setQuery } : { setQuery : any }) {
     const OnRunQuery = async () => {
         try {
             setQuery(queryTextInput);
-            // const resp = await fetchGraph(queryTextInput);
-            // console.log("Successfully ran query: ");
-            // console.log(queryTextInput);
-            // console.log("Response: ", resp);
         } catch (e) { throw e; }
-
     }
 
     const handleInputChange = (e: any) => {
