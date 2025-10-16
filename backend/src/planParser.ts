@@ -30,12 +30,13 @@ export class PlanParser {
       children: [],
       filter: node.Filter || node["Join Filter"],
       indexCond: node["Index Cond"],
-      removedRows: node["Rows Removed by Filter"],
+      rowsRemoved: node["Rows Removed by Filter"],
       indexName: node["Index Name"],
       joinType: node["Join Type"],
       output: node["Output"],
       depth,
       parentId,
+      innerUnique: node["Inner Unique"],
     };
 
     // Recursively process children

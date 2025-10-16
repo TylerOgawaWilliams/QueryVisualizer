@@ -4,6 +4,7 @@ import {
   Edge,
   NodeType,
   ScanNodeData,
+  JoinNodeData,
   Graph,
   TableNodeInfo,
   TableNodeData,
@@ -27,8 +28,12 @@ export class QueryGraph {
       case "Bitmap Index Scan":
       case "Bitmap Heap Scan": 
         return NodeType.SCAN;
+      case "Hash Join":
+      case "Merge Join": 
+        return NodeType.JOIN;
       default:
         if (node_info.nodeType.includes("Scan")) return NodeType.SCAN;
+        else if (node_info.nodeType.includes("Join")) return NodeType.JOIN;
         return NodeType.NONE;
     }
   }
@@ -98,6 +103,57 @@ export class QueryGraph {
     return node;
   }
 
+  private createJoinNode(node_info: NodeInfo) : Node {
+    const attributes = node_info.output?.map((col) => {
+      const colSplit: string[] = col.split(/\./);
+
+      const currRelation: string = colSplit[0];
+      const currCol = colSplit[1];
+      console.log(currRelation)
+
+      const type = this.tables.getKeyType(currRelation, currCol);
+      const isPk = this.tables.isPrimaryKey(currRelation, currCol);
+      const isFk = this.tables.isForeignKey(currRelation, currCol);
+
+      const attribute : Attribute = {
+        name: currCol,
+        type: type ?? "",
+        keyType: isPk ? "PK" : isFk ? "FK" : undefined
+      }
+
+      return attribute;
+    }) ?? [];
+    
+    const table : TableNodeData = {
+      depth: node_info.depth,
+      name : "",
+      attributes: attributes,
+      rowCount: node_info.planRows
+    }
+
+    const data : JoinNodeData = {
+        depth: node_info.depth,
+        name: node_info.nodeType,
+        joinType: node_info.joinType ?? 'unknown',
+        innerUnique: node_info.innerUnique ?? 'unknown',
+        filter: node_info.filter,
+        rowsRemoved: node_info.rowsRemoved ?? 'unknown',
+        startUpCost: node_info.startupCost,
+        totalCost: node_info.totalCost,
+        table: table,
+    }
+
+    const node: Node = {
+      id: node_info.id,
+      type: NodeType.JOIN,
+      position: QueryGraph.default_pos,
+      data: data,
+    };
+
+    return node;
+
+    }
+
   private createEdge(source_id: string, target_id: string): Edge {
     const edge: Edge = {
       id: `e-${source_id}-${target_id}`,
@@ -127,6 +183,10 @@ export class QueryGraph {
         case NodeType.SCAN:
           const scan_node = this.createScanNode(n);
           nodes.push(scan_node);
+          break;
+        case NodeType.JOIN:
+          const join_node = this.createJoinNode(n);
+          nodes.push(join_node);
           break;
         case NodeType.NONE:
         default:
