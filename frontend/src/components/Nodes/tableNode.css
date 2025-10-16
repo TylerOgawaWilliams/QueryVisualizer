@@ -6,7 +6,7 @@
     background: #f4b4ff7a;
 }
 
-.table .attributes {
+.node .attributes {
     display: flex;
 
     div {
@@ -27,7 +27,7 @@
     }
 }
 
-.table {
+.node {
     .names, .types, .keyTypes {
         display: flex;
         flex-direction: column;
@@ -35,35 +35,34 @@
         padding-block: 0.25em;
     }
 
+    .keyTypes {
+        color: gray;
+    }
+}
+
+.table {
     .types {
         color: #f4b4ff;
     }
 
-    .keyTypes {
-        color: gray;
-    }
-
-    p {
-        font-size: 14px;
+    .rowCount span {
+        color: #f4b4ff;
     }
 }
 
-.table .attribute {
+.node .attribute {
     display: flex;
     justify-content: space-between;
     padding: 0.5em;
 }
 
-.table .hline {
+.node .hline {
     background: black;
     height: 2px;
     width: 100%;
 }
 
-.table .rowCount {
+.node .rowCount {
     align-self: center;
     margin: 0.25em 0 0;
-    span {
-        color: #f4b4ff;
-    }
 }

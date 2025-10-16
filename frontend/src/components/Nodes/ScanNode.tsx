@@ -1,6 +1,7 @@
 import { type NodeProps, Handle, Position } from "reactflow";
 import type { ScanNodeData } from "../../types";
 import "./scanNode.css"
+import { InnerTableNode } from "./TableNode";
 
 export function ScanNode({ data }: NodeProps<ScanNodeData>) {
     const getFilter = () => {
@@ -29,21 +30,25 @@ export function ScanNode({ data }: NodeProps<ScanNodeData>) {
                     <div className="name"> <h1>{data.name}</h1> </div>
                     <div className="startup-cost">
                         <p>Startup Cost: </p>
-                        <p>{data.startUpCost}</p>
+                        <p><span>{data.startUpCost}</span></p>
                     </div>
+                    <div className="hline-gray"></div>
                     <div className="total-cost">
                         <p>Total Cost: </p>
-                        <p>{data.totalCost}</p>
+                        <p><span>{data.totalCost}</span></p>
                     </div>
-                    <div className="hline"> </div>
                     { filter && (
+                        <>
+                        <div className="hline-black"> </div>
                         <div className="filter">
-                            <p>Filter/Condition: </p>
+                            <p>Filter: </p>
                             <div>
                                 <p><span>{filter}</span></p>
                             </div>
                         </div>
+                        </>
                     )}
+                    <InnerTableNode data={data.table}/>
                 </div>
             </div>
             <Handle 
