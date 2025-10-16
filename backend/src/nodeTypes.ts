@@ -20,6 +20,7 @@ export interface PlanNode {
   "Join Filter"?: string;
   Output?: string[];
   "Inner Unique"?: string; 
+  "Merge Cond"?: string;
 }
 
 export interface NodeInfo {
@@ -41,6 +42,8 @@ export interface NodeInfo {
   depth: number;
   output?: string[];
   innerUnique?: string;
+  hashCond?: string;
+  mergeCond?: string;
 }
 
 export interface Attribute {
@@ -104,6 +107,7 @@ export enum NodeType {
   TABLE = "Table",
   SCAN = "Scan",
   JOIN = "Join",
+  MINI = "Mini",
   NONE = "None",
 }
 
@@ -114,13 +118,8 @@ export interface JoinNodeData extends NodeData {
     rowsRemoved?: string;
     startUpCost: number;
     totalCost: number;
+    hashCond?: string; 
+    mergeCond?: string;
     table: TableNodeData;
 }
 
-export interface HashJoinNodeData extends JoinNodeData {
-    hashCond: string; 
-}
-
-export interface MergeJoinNodeData extends JoinNodeData {
-    mergeCond: string;
-}

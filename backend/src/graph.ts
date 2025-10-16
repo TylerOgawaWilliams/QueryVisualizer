@@ -1,6 +1,7 @@
 import {
   Node,
   NodeInfo,
+  NodeData,
   Edge,
   NodeType,
   ScanNodeData,
@@ -15,9 +16,11 @@ import { Tables } from "./tables";
 export class QueryGraph {
   private static default_pos = { x: 0, y: 0 };
   private tables: Tables;
+  private links: Array<{ source: string, target: string }>;
 
-  constructor(tables: Tables) {
+  constructor(tables: Tables, links: Array<{ source: string; target: string }> ) {
     this.tables = tables;
+    this.links = links;
   }
 
   private getNodeType(node_info: NodeInfo): NodeType {
@@ -31,9 +34,12 @@ export class QueryGraph {
       case "Hash Join":
       case "Merge Join": 
         return NodeType.JOIN;
+      case "Hash":
+        return NodeType.MINI;
       default:
         if (node_info.nodeType.includes("Scan")) return NodeType.SCAN;
         else if (node_info.nodeType.includes("Join")) return NodeType.JOIN;
+        else if (node_info.nodeType.includes("Hash")) return NodeType.MINI;
         return NodeType.NONE;
     }
   }
@@ -140,8 +146,10 @@ export class QueryGraph {
         rowsRemoved: node_info.rowsRemoved ?? 'unknown',
         startUpCost: node_info.startupCost,
         totalCost: node_info.totalCost,
+        hashCond: node_info.hashCond ?? 'unknown',
+        mergeCond: node_info.mergeCond ?? 'unknown',
         table: table,
-    }
+    };
 
     const node: Node = {
       id: node_info.id,
@@ -152,6 +160,22 @@ export class QueryGraph {
 
     return node;
 
+  }
+
+  private createMiniNode(node_info: NodeInfo): Node {
+        const data: NodeData = {
+            depth: node_info.depth,
+            name: node_info.nodeType,
+        };
+
+        const node: Node = {
+            id: node_info.id,
+            type: NodeType.MINI,
+            position: QueryGraph.default_pos,
+            data: data,
+        };
+
+        return node;
     }
 
   private createEdge(source_id: string, target_id: string): Edge {
@@ -188,11 +212,19 @@ export class QueryGraph {
           const join_node = this.createJoinNode(n);
           nodes.push(join_node);
           break;
+        case NodeType.MINI:
+          const mini_node = this.createMiniNode(n); nodes.push(mini_node);
+          break;
         case NodeType.NONE:
         default:
           console.log(`Node type not yet implemented for: ${n.nodeType}`);
       }
     }
+
+    for (const n of this.links) {
+            const edge = this.createEdge(n.source, n.target);
+            edges.push(edge);
+        }
 
     return { nodes: nodes, edges: edges };
   }

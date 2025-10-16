@@ -60,8 +60,10 @@ app.post("/api/query-graph", async (req: Request, res: Response) => {
     const tables = new Tables(execution_order);
     await tables.init();
     const source_nodes = tables.getTableNodes();
+    const links = PlanParser.getTreeLinks(parsed_plan);
+    console.log("Links: ", links);
 
-    const queryGraph = new QueryGraph(tables);
+    const queryGraph = new QueryGraph(tables, links);
     const graph = queryGraph.getGraph(execution_order, source_nodes);
     
     const resp: GraphResponse = {
