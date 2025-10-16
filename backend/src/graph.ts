@@ -68,9 +68,12 @@ export class QueryGraph {
         return { name: col, type: "", keyType: undefined }
       }
 
-      const type = this.tables.getKeyType(node_info.relationName, col);
-      const isPk = this.tables.isPrimaryKey(node_info.relationName, col);
-      const isFk = this.tables.isForeignKey(node_info.relationName, col);
+      const colSplit: string[] = col.split(/\./);
+      const currCol = colSplit[1];
+
+      const type = this.tables.getKeyType(node_info.relationName, currCol);
+      const isPk = this.tables.isPrimaryKey(node_info.relationName, currCol);
+      const isFk = this.tables.isForeignKey(node_info.relationName, currCol);
 
       const attribute : Attribute = {
         name: col,
