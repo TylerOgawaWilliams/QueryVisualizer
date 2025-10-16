@@ -6,7 +6,6 @@ import {
   NodeType,
   ScanNodeData,
   JoinNodeData,
-  HashNodeData,
   Graph,
   TableNodeInfo,
   TableNodeData,
@@ -17,9 +16,11 @@ import { Tables } from "./tables";
 export class QueryGraph {
   private static default_pos = { x: 0, y: 0 };
   private tables: Tables;
+  private links: Array<{ source: string, target: string }>;
 
-  constructor(tables: Tables) {
+  constructor(tables: Tables, links: Array<{ source: string; target: string }> ) {
     this.tables = tables;
+    this.links = links;
   }
 
   private getNodeType(node_info: NodeInfo): NodeType {
@@ -212,14 +213,18 @@ export class QueryGraph {
           nodes.push(join_node);
           break;
         case NodeType.MINI:
-          const mini_node = this.createMiniNode(n);
-          nodes.push(mini_node);
+          const mini_node = this.createMiniNode(n); nodes.push(mini_node);
           break;
         case NodeType.NONE:
         default:
           console.log(`Node type not yet implemented for: ${n.nodeType}`);
       }
     }
+
+    for (const n of this.links) {
+            const edge = this.createEdge(n.source, n.target);
+            edges.push(edge);
+        }
 
     return { nodes: nodes, edges: edges };
   }

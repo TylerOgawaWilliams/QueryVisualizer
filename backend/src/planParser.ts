@@ -17,6 +17,7 @@ export class PlanParser {
 
     console.log(`Processing node at depth ${depth}: ${node["Node Type"]}`);
     console.log(`Node has ${node.Plans?.length || 0} children`);
+    console.log("Node: ", node);
 
     const single_node: NodeInfo = {
       id,

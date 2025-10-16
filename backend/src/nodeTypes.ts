@@ -123,6 +123,3 @@ export interface JoinNodeData extends NodeData {
     table: TableNodeData;
 }
 
-export interface HashNodeData extends NodeData {
-    peakMemoryUsage: string;
-}

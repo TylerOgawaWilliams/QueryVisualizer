@@ -1,9 +1,9 @@
-.scan .node-type {
-    background: #1d7bff7e;
+.mini .node-type {
+    background: #4CBB17;
 }
 
-.scan.node .name {
-    background: #1d7bffb6;
+.mini.node .name {
+    background: #4CBB17;
     display: flex;
     flex-direction: column;
     align-items: center;
