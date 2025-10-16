@@ -200,6 +200,7 @@ export class QueryGraph {
       const edge = this.createEdge(n.id, n.targetNode);
       nodes.push(node);
       edges.push(edge);
+      console.log("Edge: ", n.id, n.targetNode);
     }
 
     for (const n of node_info) {
@@ -210,10 +211,12 @@ export class QueryGraph {
           break;
         case NodeType.JOIN:
           const join_node = this.createJoinNode(n);
+          console.log("Join node id: ", join_node.id);
           nodes.push(join_node);
           break;
         case NodeType.MINI:
-          const mini_node = this.createMiniNode(n); nodes.push(mini_node);
+          const mini_node = this.createMiniNode(n); 
+          nodes.push(mini_node);
           break;
         case NodeType.NONE:
         default:
@@ -222,7 +225,8 @@ export class QueryGraph {
     }
 
     for (const n of this.links) {
-            const edge = this.createEdge(n.source, n.target);
+            const edge = this.createEdge(n.target, n.source);
+            console.log("Edge: ", n.source, n.target);
             edges.push(edge);
         }
 
