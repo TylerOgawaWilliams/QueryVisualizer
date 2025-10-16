@@ -37,7 +37,7 @@ export class Tables {
     }
 
     public getKeyType(table: string, attribute: string) : string | undefined {
-        return this.keyTypes[table][attribute];
+        return this.keyTypes[table] ? this.keyTypes[table][attribute] : undefined;
     }
 
     private async setPrimaryKeys() {
