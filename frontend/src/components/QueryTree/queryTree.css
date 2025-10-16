@@ -13,21 +13,6 @@
     background-color: #fafafa;
 }
 
-.query-tree .react-flow__node {
-    background-color: #78b281;
-    border: 2px solid #5a9a65;
-    border-radius: 8px;
-    color: white;
-    font-weight: 600;
-    font-size: 14px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.query-tree .react-flow__node:hover {
-    background-color: #6ba073;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
 .query-tree .react-flow__edge-path {
     stroke: #ea5039;
     stroke-width: 2;

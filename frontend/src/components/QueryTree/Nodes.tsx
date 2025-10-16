@@ -1,15 +1,55 @@
 import { type NodeProps, Handle, Position } from "reactflow";
-import type { SeqScanNodeData, SourceNodeData } from "../../types";
+import type { TableNodeData, ScanNodeData } from "../../types";
 import "./nodes.css"
 
-export function SourceNode({ data }: NodeProps<SourceNodeData>) {
+export function TableNode({ data }: NodeProps<TableNodeData>) {
     return (
         <>
-            <div className="node">
-                <h1>{data.name}</h1>
-                { data.columns?.map((col) => {
-                    return (<p key={col}> {col} </p>)
-                }) }
+            <div className="table node">
+                <div className="node-type"> <h3>Table</h3> </div>
+                <div className="contents">
+                    <div className="name"> <h1>{data.name}</h1> </div>
+                    <div className="attributes">
+                        <div className="names">
+                            { data.attributes.map((a, i) => {
+                                return (
+                                    <div key={i}>
+                                        <p>{a.name}</p>
+                                        { i != data.attributes.length - 1 && (
+                                            <div className="hline"> </div>
+                                        )}
+                                    </div>
+                                )
+                            }) }
+                        </div>
+                        <div className="types">
+                            { data.attributes.map((a, i) => {
+                                return (
+                                    <div key={i + data.attributes.length}>
+                                        <p><strong>{a.type}</strong></p>
+                                        { i != data.attributes.length - 1 && (
+                                            <div className="hline"> </div>
+                                        )}
+                                    </div>
+                                )
+                            }) }
+                        </div>
+                        <div className="keyTypes">
+                            { data.attributes.map((a, i) => {
+                                return (
+                                    <div key={i + (2 * data.attributes.length)}>
+                                        <p><strong>{a.keyType}&nbsp;</strong></p>
+                                        { i != data.attributes.length - 1 && (
+                                            <div className="hline"> </div>
+                                        )}
+                                    </div>
+                                )
+                            }) }
+                        </div>
+                    </div>
+                    <div className="hline"> </div>
+                    <p className="rowCount">row count: <span>{data.rowCount}</span></p>
+                </div>
             </div>
             <Handle 
                 type="source"
@@ -19,7 +59,7 @@ export function SourceNode({ data }: NodeProps<SourceNodeData>) {
     )
 }
 
-export function SeqScanNode({ data }: NodeProps<SeqScanNodeData>) {
+export function ScanNode({ data }: NodeProps<ScanNodeData>) {
     return (
         <>
             <Handle 
@@ -28,9 +68,6 @@ export function SeqScanNode({ data }: NodeProps<SeqScanNodeData>) {
             />
             <div className="node">
                 <h1>{data.name}</h1>
-                { data.columns?.map((col) => {
-                    return (<p key={col}> {col} </p>)
-                }) }
             </div>
             <Handle 
                 type="source"

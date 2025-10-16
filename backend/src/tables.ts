@@ -86,7 +86,7 @@ export class Tables {
     }
 
     private async setAttributes() {
-        const column_query = `SELECT column_name, data_type
+        const column_query = `SELECT column_name, udt_name
                               FROM information_schema.columns
                               WHERE table_name = $1
                               ORDER BY ordinal_position`;
@@ -101,7 +101,7 @@ export class Tables {
                     
                     const attribute : Attribute = {
                         name: r.column_name, 
-                        type: r.data_type,
+                        type: r.udt_name,
                         keyType: keyType
                     }
                     console.log("Attribute: ", attribute);
@@ -110,7 +110,7 @@ export class Tables {
                         this.keyTypes[n.relationName!] = {};
                     }
                     
-                    this.keyTypes[n.relationName!][r.column_name] = r.data_type;
+                    this.keyTypes[n.relationName!][r.column_name] = r.udt_name;
                     return attribute;
                 });
 

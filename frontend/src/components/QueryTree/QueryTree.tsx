@@ -11,11 +11,12 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import './queryTree.css'
 import { fetchGraph } from '../../helpers/api';
-import { SeqScanNode, SourceNode } from './Nodes';
+import { TableNode, ScanNode } from './Nodes';
+import type { NodeType } from '../../types';
 
-const nodeTypes = {
-    source: SourceNode,
-    seq_scan: SeqScanNode
+const nodeTypes : { [key in NodeType]?: React.ComponentType<any> } = {
+    "Table": TableNode,
+    "Scan": ScanNode
 }
 
 export function QueryTree({ query } : { query : string }) {
@@ -23,6 +24,7 @@ export function QueryTree({ query } : { query : string }) {
     if (query === "") return;
     async function graph() {
       const { graph } = await fetchGraph(query);
+      console.log(graph);
       setNodes(graph.nodes);
       setEdges(graph.edges);
     }   
