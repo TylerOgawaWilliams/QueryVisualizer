@@ -104,6 +104,7 @@ export enum NodeType {
   TABLE = "Table",
   SCAN = "Scan",
   JOIN = "Join",
+  MINI = "Mini",
   NONE = "None",
 }
 
@@ -123,4 +124,8 @@ export interface HashJoinNodeData extends JoinNodeData {
 
 export interface MergeJoinNodeData extends JoinNodeData {
     mergeCond: string;
+}
+
+export interface HashNodeData extends NodeData {
+    peakMemoryUsage: string;
 }
