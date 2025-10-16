@@ -33,7 +33,7 @@ export interface NodeData {
 export interface Attribute {
   name: string;
   type: string;
-  keyType: "PK" | "FK" | undefined;
+  keyType: "PK" | "FK" | "PK, FK" | undefined;
 }
 
 export interface TableNodeData extends NodeData {

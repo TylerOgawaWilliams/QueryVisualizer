@@ -118,7 +118,7 @@ export class QueryGraph {
       const attribute : Attribute = {
         name: currCol,
         type: type ?? "",
-        keyType: isPk ? "PK" : isFk ? "FK" : undefined
+        keyType: isPk && isFk ? "PK, FK" : isPk ? "PK" : isFk ? "FK" : undefined
       }
 
       return attribute;

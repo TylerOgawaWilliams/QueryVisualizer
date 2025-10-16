@@ -46,7 +46,7 @@ export interface NodeInfo {
 export interface Attribute {
   name: string;
   type: string;
-  keyType: "PK" | "FK" | undefined;
+  keyType: "PK" | "FK" | "PK, FK" | undefined;
 }
 
 export interface TableNodeInfo {

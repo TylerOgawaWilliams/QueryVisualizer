@@ -79,7 +79,8 @@ export class Tables {
         for (const n of this.node_info) {
             if (n.nodeType.includes("Scan") && n.relationName) {
                 const fkResult = await this.db.pool.query(fkQuery, [n.relationName]);
-                const fks = fkResult.rows.map(r => r.column_name);
+                const fks = fkResult.rows.map(r => r.fk_column);
+                console.log("Foreign Keys: ", fks);
                 this.foreign_keys[n.relationName] = fks;
             }
         }
@@ -97,7 +98,7 @@ export class Tables {
                 const attributes = columnResult.rows.map((r) => {
                     const isPK = this.isPrimaryKey(n.relationName!, r.column_name)
                     const isFK = this.isForeignKey(n.relationName!, r.column_name)
-                    const keyType = isPK ? "PK" : isFK ? "FK" : undefined;
+                    const keyType = isPK && isFK ? "PK, FK" : isPK ? "PK" : isFK ? "FK" : undefined;
                     
                     const attribute : Attribute = {
                         name: r.column_name, 
@@ -123,7 +124,7 @@ export class Tables {
                     relationName: n.relationName,
                     columns: attributes,
                     depth: n.depth - 1,
-                    rowCount: columnResult.rows.length
+                    rowCount: n.planRows
                 }
 
                 this.tableNodes.push(node);
