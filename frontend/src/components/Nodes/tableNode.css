@@ -8,6 +8,8 @@
 
 .node .attributes {
     display: flex;
+    width: 100%;
+    justify-content: space-between;
 
     div {
         display: flex;
@@ -33,10 +35,15 @@
         flex-direction: column;
         gap: 0.25em;
         padding-block: 0.25em;
+        width: 100%;
     }
 
     .keyTypes {
         color: gray;
+    }
+
+    .keyTypes p {
+        align-self: flex-end;
     }
 }
 
@@ -48,12 +55,6 @@
     .rowCount span {
         color: #f4b4ff;
     }
-}
-
-.node .attribute {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5em;
 }
 
 .node .hline {
