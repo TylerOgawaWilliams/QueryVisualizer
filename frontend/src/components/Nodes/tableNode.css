@@ -1,69 +1,16 @@
-.node-type {
-    background: #f4b4ff7a;
-}
-
-.node .name {
-    background: #f4b4ff7a;
-}
-
-.node .attributes {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-
-    div {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25em;
-    }
-    
-    .hline {
-        height: 2px;
-        background: lightgray;
-        width: 100%;
-    }
-
-    p { 
-        margin-inline: 0.35em;
-        margin-block: 0;
-    }
-}
-
-.node {
-    .names, .types, .keyTypes {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25em;
-        padding-block: 0.25em;
-        width: 100%;
-    }
-
-    .keyTypes {
-        color: gray;
-    }
-
-    .keyTypes p {
-        align-self: flex-end;
-    }
-}
-
 .table {
+    .node-type {
+        background: #F4A2597a;
+    }
+    .name {
+        background: #F4A2597a;
+    }   
+
     .types {
-        color: #f4b4ff;
+        color: #F4A259;
     }
 
     .rowCount span {
-        color: #f4b4ff;
+        color: #F4A259;
     }
-}
-
-.node .hline {
-    background: black;
-    height: 2px;
-    width: 100%;
-}
-
-.node .rowCount {
-    align-self: center;
-    margin: 0.25em 0 0;
 }

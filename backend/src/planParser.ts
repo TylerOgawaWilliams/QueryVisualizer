@@ -1,4 +1,4 @@
-import { PlanNode, NodeInfo } from "./nodeTypes";
+import { PlanNode, NodeInfo } from "./types/nodeTypes";
 
 export class PlanParser {
   private static nodeCounter = 0;
@@ -23,6 +23,7 @@ export class PlanParser {
       id,
       nodeType: node["Node Type"],
       relationName: node["Relation Name"],
+      alias: node["Alias"],
       totalCost: node["Total Cost"] || 0,
       startupCost: node["Startup Cost"] || 0,
       planRows: node["Plan Rows"] || 0,

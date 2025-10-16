@@ -1,15 +1,18 @@
-.join .node-type {
-    background: #FF441F;
-}
-
-.join.node .name {
-    background: #FF441F;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-block: 1.5px black solid;
-
-    h1 {
-        font-size: 16px;
+.join {
+    .node-type {
+        background: #C86A6F80;
+    }
+    
+    .name {
+        background: #C86A6F;
+    }
+    
+    span, strong {
+        color: #C86A6F;
+    }
+    
+    .filter div {
+        color: #C86A6F;
+        background: #C86A6F1c;
     }
 }

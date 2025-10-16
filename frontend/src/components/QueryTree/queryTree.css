@@ -14,13 +14,13 @@
 }
 
 .query-tree .react-flow__edge-path {
-    stroke: #ea5039;
-    stroke-width: 2;
+    stroke: #000000;
+    stroke-width: 3px;
 }
 
 .query-tree .react-flow__edge:hover .react-flow__edge-path {
-    stroke: #d43d26;
-    stroke-width: 3;
+    stroke: #000000;
+    stroke-width: 5px;
 }
 
 .query-tree .react-flow__controls {

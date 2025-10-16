@@ -1,6 +1,7 @@
 import { type NodeProps, Handle, Position } from "reactflow";
 import type { JoinNodeData } from "../../types";
 import "./joinNode.css"
+import { InnerTableNode } from "./TableNode";
 
 export function JoinNode({ data }: NodeProps<JoinNodeData>) {
     const getJoinCond = () => {
@@ -30,20 +31,22 @@ export function JoinNode({ data }: NodeProps<JoinNodeData>) {
                     <div className="name"> <h1>{data.name}</h1> </div>
                     <div className="startup-cost">
                         <p>Startup Cost: </p>
-                        <p>{data.startUpCost}</p>
+                        <p><strong>{data.startUpCost}</strong></p>
                     </div>
+                    <div className="hline-gray"></div>
                     <div className="total-cost">
                         <p>Total Cost: </p>
-                        <p>{data.totalCost}</p>
+                        <p><strong>{data.totalCost}</strong></p>
                     </div>
                     <div className="hline"> </div>
                     {joinCond && (
-                        <div className="join-condition">
+                        <div className="filter">
                             <p>Join Condition: </p>
                             <div>
                                 <p><span>{joinCond}</span></p>
                             </div>
                         </div>)}
+                    <InnerTableNode data={data.table} />
                 </div>
             </div>
             <Handle 

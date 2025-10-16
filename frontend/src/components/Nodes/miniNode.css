@@ -1,15 +1,7 @@
-.mini .node-type {
-    background: #4CBB17;
-}
-
-.mini.node .name {
-    background: #4CBB17;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-block: 1.5px black solid;
-
-    h1 {
-        font-size: 16px;
+.mini {
+    .node-type {
+        background: #8CB369;
+        border-radius: 5px;
     }
 }
+

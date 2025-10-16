@@ -10,7 +10,7 @@ import {
   TableNodeInfo,
   TableNodeData,
   Attribute,
-} from "./nodeTypes";
+} from "./types/nodeTypes";
 import { Tables } from "./tables";
 
 export class QueryGraph {
@@ -68,12 +68,12 @@ export class QueryGraph {
         return { name: col, type: "", keyType: undefined }
       }
 
-      const colSplit: string[] = col.split(/\./);
-      const currCol = colSplit[1];
+      const contains_relation = col.includes('.');
+      const curCol = contains_relation ? col.split(/\./)[1] : col;
 
-      const type = this.tables.getKeyType(node_info.relationName, currCol);
-      const isPk = this.tables.isPrimaryKey(node_info.relationName, currCol);
-      const isFk = this.tables.isForeignKey(node_info.relationName, currCol);
+      const type = this.tables.getKeyType(node_info.relationName, curCol);
+      const isPk = this.tables.isPrimaryKey(node_info.relationName, curCol);
+      const isFk = this.tables.isForeignKey(node_info.relationName, curCol);
 
       const attribute : Attribute = {
         name: col,
@@ -115,9 +115,8 @@ export class QueryGraph {
   private createJoinNode(node_info: NodeInfo) : Node {
     const attributes = node_info.output?.map((col) => {
       const colSplit: string[] = col.split(/\./);
-
-      const currRelation: string = colSplit[0];
       const currCol = colSplit[1];
+      const currRelation = this.tables.getRelationFromAlias(colSplit[0]);
       console.log(currRelation)
 
       const type = this.tables.getKeyType(currRelation, currCol);
@@ -125,7 +124,7 @@ export class QueryGraph {
       const isFk = this.tables.isForeignKey(currRelation, currCol);
 
       const attribute : Attribute = {
-        name: currCol,
+        name: col,
         type: type ?? "",
         keyType: isPk && isFk ? "PK, FK" : isPk ? "PK" : isFk ? "FK" : undefined
       }

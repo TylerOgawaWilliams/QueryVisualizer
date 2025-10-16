@@ -1,6 +1,12 @@
 .node {
     display: flex;
     flex-direction: column;
+
+    .keyTypes {
+        strong { color: gray !important; }
+
+        align-self: flex-end;
+    }
 }
 
 .node-type {
@@ -32,6 +38,71 @@
     flex-direction: column;
     align-items: center;
     border-block: 1.5px black solid;
+}
+
+.node .attributes {
+    display: grid;
+    grid-template-columns: 15ch auto auto;
+
+    div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25em;
+    }
+    
+    .hline {
+        height: 2px;
+        background: lightgray;
+        width: 100%;
+    }
+
+    p { 
+        border-bottom: 2px lightgray solid;
+        padding: 0.25em 0.35em;
+        max-width: 20ch;
+        word-break: break-all;
+    }
+}
+
+.node .hline {
+    background: black;
+    height: 2px;
+    width: 100%;
+}
+
+.node .rowCount {
+    align-self: center;
+    margin: 0.25em 0 0;
+}
+
+.node .startup-cost, .node .total-cost {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.25em 0.5em;
+    gap: 0.5em;
+
+    p { margin: 0 }
+    span {
+        font-weight: bold;
+    }
+}
+
+.node .filter {
+    padding: 0.25em 0.5em;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25em;
+
+    div {
+        border-radius: 5px;
+        padding: 0.25em;
+        font-weight: bold;
+        p {
+            max-width: 35ch;
+            word-break: break-all;
+        }
+    }
 }
 
 .hline-gray {
