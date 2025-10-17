@@ -1,5 +1,5 @@
 import { Pool, PoolClient } from "pg";
-import { Attribute, NodeInfo, TableNodeInfo } from "./nodeTypes";
+import { Attribute, NodeInfo, TableNodeInfo } from "./types/nodeTypes";
 import { spawn } from "child_process";
 import fs from "fs";
 

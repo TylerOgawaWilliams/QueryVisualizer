@@ -1,4 +1,4 @@
-import { Graph } from "./nodeTypes";
+import { Graph } from "./types/nodeTypes";
 
 export interface ExplainRequest {
   query: string;

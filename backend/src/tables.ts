@@ -1,5 +1,5 @@
 import { Database } from "./database";
-import { Attribute, NodeInfo, TableNodeInfo } from "./nodeTypes";
+import { Attribute, NodeInfo, TableNodeInfo } from "./types/nodeTypes";
 
 export class Tables {
     private db : Database;
@@ -7,6 +7,7 @@ export class Tables {
     private primary_keys: {[key: string]: string[] } ; // maps tables to their primary key attributes
     private foreign_keys: {[key: string]: string[] }; // maps tables to their foreign key attributes
     private keyTypes: {[key: string]: { [key: string]: string } }; // maps tables with their attributes to attribute types
+    private aliases: {[key: string] : string};
     private attributes: {[key: string]: Attribute[] }; // maps tables to their attributes
     private tableNodes: TableNodeInfo[]; 
 
@@ -16,6 +17,7 @@ export class Tables {
         this.primary_keys = {};
         this.foreign_keys = {};
         this.keyTypes = {};
+        this.aliases = {}
         this.attributes = {};
         this.tableNodes = [];
     }
@@ -38,6 +40,11 @@ export class Tables {
 
     public getKeyType(table: string, attribute: string) : string | undefined {
         return this.keyTypes[table] ? this.keyTypes[table][attribute] : undefined;
+    }
+
+    public getRelationFromAlias(alias: string) : string {
+        console.assert(this.aliases[alias], "Alias does not exist: ", alias)
+        return this.aliases[alias];
     }
 
     private async setPrimaryKeys() {
@@ -128,6 +135,14 @@ export class Tables {
                 }
 
                 this.tableNodes.push(node);
+
+                // update aliases
+                const alias = n.alias;
+                if (alias) {
+                    this.aliases[alias] = n.relationName; 
+                } else {
+                    this.aliases[n.relationName] = n.relationName;
+                }
             }
         }
     }

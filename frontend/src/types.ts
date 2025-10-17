@@ -51,13 +51,18 @@ export interface ScanNodeData extends NodeData {
 }
 /* ---------- */
 
-export type NodeType = "Table" | "Scan" | "Join" | "None";
+export type NodeType = "Table" | "Scan" | "Join" | "Mini" | "None";
 
 export interface JoinNodeData extends NodeData {
     joinType: string;
     innerUnique: string;
     filter?: string;
     rowsRemoved?: string;
+    startUpCost: number;
+    totalCost: number;
+    hashCond?: string; 
+    mergeCond?: string;
+    table: TableNodeData;
 }
 
 export interface HashJoinNodeData extends JoinNodeData {

@@ -2,6 +2,7 @@ export interface PlanNode {
   "Node Type": string;
   "Total Cost": number;
   "Relation Name"?: string;
+  "Alias"?: string;
   "Startup Cost": number;
   "Plan Rows": number;
   "Plan Width": number;
@@ -29,6 +30,7 @@ export interface NodeInfo {
   totalCost: number;
   parentId?: string;
   relationName?: string;
+  alias?: string;
   startupCost: number;
   planRows: number;
   actualRows?: number;

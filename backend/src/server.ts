@@ -3,7 +3,7 @@ import cors from "cors";
 import { Database } from "./database";
 import { PlanParser } from "./planParser";
 import { upload } from "./upload";
-import { NodeInfo } from "./nodeTypes";
+import { NodeInfo } from "./types/nodeTypes";
 import {
   ExplainRequest,
   ExplainResponse,
@@ -13,7 +13,7 @@ import {
   DatabaseUploadResponse,
   DatabaseUploadRequest,
   CurrentDatabaseResponse,
-} from "./types";
+} from "./types/types";
 import { QueryGraph } from "./graph";
 import { Tables } from "./tables";
 
