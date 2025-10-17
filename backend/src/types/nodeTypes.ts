@@ -22,6 +22,7 @@ export interface PlanNode {
   Output?: string[];
   "Inner Unique"?: string; 
   "Merge Cond"?: string;
+  "Group Key"?: string[];
 }
 
 export interface NodeInfo {
@@ -46,6 +47,7 @@ export interface NodeInfo {
   innerUnique?: string;
   hashCond?: string;
   mergeCond?: string;
+  groupKey?: string[];
 }
 
 export interface Attribute {
@@ -103,25 +105,36 @@ export interface ScanNodeData extends NodeData {
   indexCond?: string;
   table: TableNodeData;
 }
+
+export interface JoinNodeData extends NodeData {
+  joinType: string;
+  innerUnique: string;
+  filter?: string;
+  rowsRemoved?: string;
+  startUpCost: number;
+  totalCost: number;
+  hashCond?: string; 
+  mergeCond?: string;
+  table: TableNodeData;
+}
+
+export interface AggregateNodeData extends NodeData {
+  startUpCost: number;
+  totalCost: number;
+  filter: string | undefined;
+  groupBy: string[] | undefined; 
+  columns: string[] | undefined;
+}
+
 /* ---------- */
 
 export enum NodeType {
   TABLE = "Table",
   SCAN = "Scan",
   JOIN = "Join",
+  AGGREGATE = "Aggregate",
   MINI = "Mini",
   NONE = "None",
 }
 
-export interface JoinNodeData extends NodeData {
-    joinType: string;
-    innerUnique: string;
-    filter?: string;
-    rowsRemoved?: string;
-    startUpCost: number;
-    totalCost: number;
-    hashCond?: string; 
-    mergeCond?: string;
-    table: TableNodeData;
-}
 

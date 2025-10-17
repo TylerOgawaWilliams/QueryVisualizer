@@ -1,0 +1,18 @@
+.aggregate {
+    .node-type {
+        background: #877BB77e;
+    }
+    
+    .name {
+        background: #877BB7;
+    }
+    
+    strong, span {
+        color: #877BB7;
+    }
+    
+    .filter div {
+        background: #877BB734;
+        color: #877BB7;
+    }
+}

@@ -64,6 +64,16 @@
     }
 }
 
+.node .attributes.single-col {
+    grid-template-columns: 100%;
+    justify-content: center;
+
+    p { 
+        width: 100%;
+        text-align: center;
+    }
+}
+
 .node .hline {
     background: black;
     height: 2px;

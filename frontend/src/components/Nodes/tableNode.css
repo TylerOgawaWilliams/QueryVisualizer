@@ -13,4 +13,8 @@
     .rowCount span {
         color: #F4A259;
     }
+
+    strong {
+        color: #F4A259;
+    }
 }

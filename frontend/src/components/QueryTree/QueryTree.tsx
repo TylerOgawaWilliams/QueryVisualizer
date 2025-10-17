@@ -17,11 +17,13 @@ import { JoinNode } from '../Nodes/JoinNode';
 import { MiniNode } from '../Nodes/MiniNode';
 import type { NodeType } from '../../types';
 import "../Nodes/nodes.css";
+import { AggregateNode } from '../Nodes/AggregateNode';
 
 const nodeTypes : { [key in NodeType]?: React.ComponentType<any> } = {
     "Table": TableNode,
     "Scan": ScanNode,
     "Join": JoinNode,
+    "Aggregate": AggregateNode,
     "Mini": MiniNode
 }
 
@@ -30,7 +32,6 @@ export function QueryTree({ query } : { query : string }) {
     if (query === "") return;
     async function graph() {
       const { graph } = await fetchGraph(query);
-      console.log(graph);
       setNodes(graph.nodes);
       setEdges(graph.edges);
     }   
