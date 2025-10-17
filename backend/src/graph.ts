@@ -91,7 +91,7 @@ export class QueryGraph {
       depth: node_info.depth,
       name : "",
       attributes: attributes,
-      rowCount: node_info.planRows
+      rowCount: node_info.actualRows
     }
 
     const data : ScanNodeData = {
@@ -139,7 +139,7 @@ export class QueryGraph {
       depth: node_info.depth,
       name : "",
       attributes: attributes,
-      rowCount: node_info.planRows
+      rowCount: node_info.actualRows
     }
 
     const data : JoinNodeData = {

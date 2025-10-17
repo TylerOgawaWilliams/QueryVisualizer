@@ -124,6 +124,11 @@ export class Tables {
 
                 this.attributes[n.relationName] = attributes;
 
+                // Get row count
+                const rowQuery = `SELECT COUNT(*) FROM ${n.relationName}`;
+                const rowResult = await this.db.pool.query(rowQuery);
+                const rowCount = rowResult.rows[0].count;
+
                 // Create the table node
                 const node : TableNodeInfo = {
                     id: `table-${n.id}`,
@@ -131,7 +136,7 @@ export class Tables {
                     relationName: n.relationName,
                     columns: attributes,
                     depth: n.depth - 1,
-                    rowCount: n.planRows
+                    rowCount: rowCount
                 }
 
                 this.tableNodes.push(node);

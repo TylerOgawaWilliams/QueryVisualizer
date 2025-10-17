@@ -8,7 +8,7 @@ export interface PlanNode {
   "Plan Width": number;
   "Actual Total Time"?: number;
   "Actual Startup Time"?: number;
-  "Actual Rows"?: number;
+  "Actual Rows": number;
   "Actual Loops"?: number;
   Plans?: PlanNode[];
   Filter?: string;
@@ -34,7 +34,7 @@ export interface NodeInfo {
   alias?: string;
   startupCost: number;
   planRows: number;
-  actualRows?: number;
+  actualRows: number;
   actualTime?: number;
   children: NodeInfo[];
   filter?: string;
