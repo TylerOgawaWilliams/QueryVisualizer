@@ -42,7 +42,7 @@
 
 .node .attributes {
     display: grid;
-    grid-template-columns: 15ch auto auto;
+    grid-template-columns: auto auto auto;
 
     div {
         display: flex;
@@ -65,12 +65,13 @@
 }
 
 .node .attributes.single-col {
-    grid-template-columns: 100%;
+    grid-template-columns: 1fr;
     justify-content: center;
 
     p { 
         width: 100%;
         text-align: center;
+        max-width: none;
     }
 }
 
