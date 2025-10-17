@@ -197,27 +197,48 @@ export class QueryGraph {
     const nodes: Node[] = [];
     const edges: Edge[] = [];
 
+    const node_dict = new Map<string, Node>();
+
+    var offset = 0;
     for (const n of table_nodes) {
       const node = this.createTableNode(n);
+      node.position = { x: 0, y: offset };
+      offset += n.columns.length * 35 + 100;
+      node_dict.set(node.id,node);
       const edge = this.createEdge(n.id, n.targetNode);
       nodes.push(node);
       edges.push(edge);
-      console.log("Edge: ", n.id, n.targetNode);
     }
 
+    var max_depth = 0;
     for (const n of node_info) {
+        if(n.depth > max_depth) {
+            max_depth = n.depth;         
+        }
+    }
+
+    console.log("Max depth of tree: ", max_depth);
+
+    for (const n of node_info) {
+      n.depth = Math.abs(n.depth - max_depth) + 1;
+      console.log("New depth: ", n.depth);
       switch (this.getNodeType(n)) {
         case NodeType.SCAN:
           const scan_node = this.createScanNode(n);
+          scan_node.position = { x: n.depth * 300, y: 0};
+          node_dict.set(scan_node.id, scan_node);
           nodes.push(scan_node);
           break;
         case NodeType.JOIN:
           const join_node = this.createJoinNode(n);
-          console.log("Join node id: ", join_node.id);
+          node_dict.set(join_node.id, join_node);
+          join_node.position = { x: n.depth * 300, y: 0};
           nodes.push(join_node);
           break;
         case NodeType.MINI:
           const mini_node = this.createMiniNode(n); 
+          node_dict.set(mini_node.id, mini_node);
+          mini_node.position = { x: n.depth * 300, y: 0};
           nodes.push(mini_node);
           break;
         case NodeType.NONE:
@@ -228,9 +249,33 @@ export class QueryGraph {
 
     for (const n of this.links) {
             const edge = this.createEdge(n.target, n.source);
-            console.log("Edge: ", n.source, n.target);
             edges.push(edge);
         }
+
+    for (const edge of edges) {
+        console.log("Edge: ", edge.source, edge.target);
+        const target_node = node_dict.get(edge.target);
+        if(!target_node) {
+            console.error(`Target node: ${edge.target} missing`);
+            continue;
+        }
+        const source_node = node_dict.get(edge.source);
+        if(!source_node) {
+            console.error(`Source node: ${edge.source} missing`);
+            continue;
+        }
+        console.log("Target node id: ", target_node.id);
+        console.log("Source node id: ", source_node.id);
+        console.log("Target node type: ", target_node.type);
+        console.log(`Source node y pos: ${source_node.position.y}`);
+        console.log(`Target node y pos: ${target_node.position.y}`);
+        if(target_node.type != "Mini") {
+            target_node.position.y = source_node.position.y;
+        }
+        else {
+            target_node.position.y = source_node.position.y + 100;
+        }
+    }
 
     return { nodes: nodes, edges: edges };
   }
