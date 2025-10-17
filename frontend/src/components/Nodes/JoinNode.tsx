@@ -17,7 +17,6 @@ export function JoinNode({ data }: NodeProps<JoinNodeData>) {
     }
 
     const joinCond = getJoinCond();
-    console.log("Join Cond: ", joinCond);
 
     return (
         <>

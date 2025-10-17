@@ -1,6 +1,7 @@
 import { type NodeProps, Handle, Position } from "reactflow";
 import type { TableNodeData } from "../../types";
 import "./tableNode.css"
+import React from "react";
 
 export function TableNode({ data }: NodeProps<TableNodeData>) {
     return (
@@ -10,42 +11,15 @@ export function TableNode({ data }: NodeProps<TableNodeData>) {
                 <div className="contents">
                     <div className="name"> <h1>{data.name}</h1> </div>
                     <div className="attributes">
-                        <div className="names">
-                            { data.attributes.map((a, i) => {
-                                return (
-                                    <div key={i}>
-                                        <p>{a.name}</p>
-                                        { i != data.attributes.length - 1 && (
-                                            <div className="hline"> </div>
-                                        )}
-                                    </div>
-                                )
-                            }) }
-                        </div>
-                        <div className="types">
-                            { data.attributes.map((a, i) => {
-                                return (
-                                    <div key={i + data.attributes.length}>
-                                        <p><strong>{a.type}</strong></p>
-                                        { i != data.attributes.length - 1 && (
-                                            <div className="hline"> </div>
-                                        )}
-                                    </div>
-                                )
-                            }) }
-                        </div>
-                        <div className="keyTypes">
-                            { data.attributes.map((a, i) => {
-                                return (
-                                    <div key={i + (2 * data.attributes.length)}>
-                                        <p><strong>{a.keyType}&nbsp;</strong></p>
-                                        { i != data.attributes.length - 1 && (
-                                            <div className="hline"> </div>
-                                        )}
-                                    </div>
-                                )
-                            }) }
-                        </div>
+                        { data.attributes.map((a, i) => {
+                            return (
+                                <React.Fragment key={i}>
+                                    <p>{a.name}</p>
+                                    <p><strong>{a.type}</strong></p>
+                                    <p className="keyTypes"><strong>{a.keyType}&nbsp;</strong></p>
+                                </React.Fragment>
+                            )
+                        }) }
                     </div>
                     <div className="hline"> </div>
                     <p className="rowCount">row count: <span>{data.rowCount}</span></p>
@@ -114,11 +88,11 @@ export function InnerTableNode({ data }: {data: TableNodeData}) {
         <div className="attributes">
             { data.attributes.map((a, i) => {
                 return (
-                    <>
+                    <React.Fragment key={i}>
                         <p>{a.name}</p>
                         <p><strong>{a.type}</strong></p>
                         <p className="keyTypes"><strong>{a.keyType}&nbsp;</strong></p>
-                    </>
+                    </React.Fragment>
                 )
             }) }
         </div>

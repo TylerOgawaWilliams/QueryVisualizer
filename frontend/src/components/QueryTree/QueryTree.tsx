@@ -30,7 +30,6 @@ export function QueryTree({ query } : { query : string }) {
     if (query === "") return;
     async function graph() {
       const { graph } = await fetchGraph(query);
-      console.log(graph);
       setNodes(graph.nodes);
       setEdges(graph.edges);
     }   
