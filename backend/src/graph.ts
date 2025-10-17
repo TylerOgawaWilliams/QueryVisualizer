@@ -14,6 +14,8 @@ import {
 } from "./types/nodeTypes";
 import { Tables } from "./tables";
 
+type NodeEdgeMapValue = [string[], string];
+
 export class QueryGraph {
   private static default_pos = { x: 0, y: 0 };
   private tables: Tables;
@@ -215,6 +217,7 @@ export class QueryGraph {
     return edge;
   }
 
+
   public getGraph(
     node_info: NodeInfo[],
     table_nodes: TableNodeInfo[],
@@ -223,12 +226,13 @@ export class QueryGraph {
     const edges: Edge[] = [];
 
     const node_dict = new Map<string, Node>();
+    const edge_dict = new Map<string, NodeEdgeMapValue>();
 
     var offset = 0;
     for (const n of table_nodes) {
       const node = this.createTableNode(n);
       node.position = { x: 0, y: offset };
-      offset += n.columns.length * 35 + 100;
+      offset += n.columns.length * 35 + 120;
       node_dict.set(node.id,node);
       const edge = this.createEdge(n.id, n.targetNode);
       nodes.push(node);
@@ -250,26 +254,26 @@ export class QueryGraph {
       switch (this.getNodeType(n)) {
         case NodeType.SCAN:
           const scan_node = this.createScanNode(n);
-          scan_node.position = { x: n.depth * 300, y: 0};
+          scan_node.position = { x: n.depth * 305, y: 0};
           node_dict.set(scan_node.id, scan_node);
           nodes.push(scan_node);
           break;
         case NodeType.JOIN:
           const join_node = this.createJoinNode(n);
           node_dict.set(join_node.id, join_node);
-          join_node.position = { x: n.depth * 300, y: 0};
+          join_node.position = { x: n.depth * 305, y: 0};
           nodes.push(join_node);
           break;
         case NodeType.AGGREGATE:
           const agg_node = this.createAggregateNode(n);
           node_dict.set(agg_node.id, agg_node);
-          agg_node.position = {x: n.depth * 300, y:0};
+          agg_node.position = {x: n.depth * 305, y:0};
           nodes.push(agg_node);
           break;
         case NodeType.MINI:
           const mini_node = this.createMiniNode(n); 
           node_dict.set(mini_node.id, mini_node);
-          mini_node.position = { x: n.depth * 300, y: 0};
+          mini_node.position = { x: n.depth * 305, y: 0};
           nodes.push(mini_node);
           break;
         case NodeType.NONE:
@@ -285,6 +289,21 @@ export class QueryGraph {
 
     for (const edge of edges) {
         console.log("Edge: ", edge.source, edge.target);
+        if(edge_dict.has(edge.target)){ 
+            const curr_target_node = edge_dict.get(edge.target)!;
+            curr_target_node[0].push(edge.source);
+            edge_dict.set(edge.target, [curr_target_node[0], curr_target_node[1]]); 
+        }
+        else {
+            edge_dict.set(edge.target, [[edge.source], ""]);
+        }
+        if(edge_dict.has(edge.source)) {
+            const curr_source_node = edge_dict.get(edge.source)!;
+            edge_dict.set(edge.source, [curr_source_node[0], edge.target]);
+        }
+        else {
+            edge_dict.set(edge.source, [[], edge.target]); 
+        }
         const target_node = node_dict.get(edge.target);
         if(!target_node) {
             console.error(`Target node: ${edge.target} missing`);
@@ -307,6 +326,56 @@ export class QueryGraph {
             console.log("Mini target node id: ", target_node.id);
         }
     }
+
+    function traverseAndSetHeight(nodeId: string, baseHeight: number): void {
+        
+        const curr_node = node_dict.get(nodeId);
+        const curr_edge_info = edge_dict.get(nodeId);
+        
+        if (!curr_node || !curr_edge_info) return;
+        
+        
+        if (curr_node.type === 'Join' || curr_node.type == 'Mini') {
+            let min_height = Number.MAX_VALUE;
+            for (const incoming_edge_id of curr_edge_info[0]) {
+                const incoming_node = node_dict.get(incoming_edge_id);
+                if (incoming_node && incoming_node.position.y < min_height) {
+                    min_height = incoming_node.position.y;
+                }
+            }
+            if (min_height !== Number.MAX_VALUE) {
+                curr_node.position.y = min_height;
+                if(curr_node.type == 'Mini') {
+                    curr_node.position.y += 100;
+                }
+            }
+        } else {
+            curr_node.position.y = baseHeight;
+        }
+        
+        console.log(`Set node ${nodeId} height to: ${curr_node.position.y}`);
+        
+        const outgoing_edge = curr_edge_info[1];
+        if (outgoing_edge && outgoing_edge !== "") {
+            traverseAndSetHeight(outgoing_edge, curr_node.position.y);
+        }
+    }
+
+    for (const [nodeId, edgeInfo] of edge_dict) {
+        const curr_node = node_dict.get(nodeId);
+        if (!curr_node) continue;
+        
+        if (edgeInfo[0].length === 0 || curr_node.position.y < 200) {
+            traverseAndSetHeight(nodeId, curr_node.position.y);
+        }
+    }
+
+    for (const [nodeId, edgeInfo] of edge_dict) {
+            const curr_node = node_dict.get(nodeId);
+            if (curr_node && curr_node.position.y < 200) {
+                traverseAndSetHeight(nodeId, curr_node.position.y);
+            }
+        }
 
     return { nodes: nodes, edges: edges };
   }
