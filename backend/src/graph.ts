@@ -34,6 +34,7 @@ export class QueryGraph {
         return NodeType.SCAN;
       case "Hash Join":
       case "Merge Join": 
+      case "Nested Loop":
         return NodeType.JOIN;
       case "Aggregate":
         return NodeType.AGGREGATE;
@@ -43,7 +44,7 @@ export class QueryGraph {
         if (node_info.nodeType.includes("Scan")) return NodeType.SCAN;
         else if (node_info.nodeType.includes("Join")) return NodeType.JOIN;
         else if (node_info.nodeType.includes("Hash")) return NodeType.MINI;
-        return NodeType.NONE;
+        return NodeType.MINI;
     }
   }
 
@@ -261,6 +262,7 @@ export class QueryGraph {
           break;
         case NodeType.AGGREGATE:
           const agg_node = this.createAggregateNode(n);
+          node_dict.set(agg_node.id, agg_node);
           agg_node.position = {x: n.depth * 300, y:0};
           nodes.push(agg_node);
           break;
@@ -293,16 +295,16 @@ export class QueryGraph {
             console.error(`Source node: ${edge.source} missing`);
             continue;
         }
-        console.log("Target node id: ", target_node.id);
-        console.log("Source node id: ", source_node.id);
-        console.log("Target node type: ", target_node.type);
-        console.log(`Source node y pos: ${source_node.position.y}`);
-        console.log(`Target node y pos: ${target_node.position.y}`);
         if(target_node.type != "Mini") {
             target_node.position.y = source_node.position.y;
+            console.log(`Target node type and : ${target_node.type}, ${target_node.position.y} `);
+            console.log("Target node id: ", target_node.id);
         }
         else {
+            console.log("Problem type: ", target_node.type);
             target_node.position.y = source_node.position.y + 100;
+            console.log("New mini target pos: ", target_node.position.y);
+            console.log("Mini target node id: ", target_node.id);
         }
     }
 
