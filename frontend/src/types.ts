@@ -41,7 +41,6 @@ export interface TableNodeData extends NodeData {
   rowCount: number;
 }
 
-/* --Scan Nodes-- */
 export interface ScanNodeData extends NodeData {
   startUpCost: number;
   totalCost: number;
@@ -49,26 +48,26 @@ export interface ScanNodeData extends NodeData {
   indexCond?: string;
   table: TableNodeData;
 }
-/* ---------- */
 
-export type NodeType = "Table" | "Scan" | "Join" | "Mini" | "None";
 
 export interface JoinNodeData extends NodeData {
-    joinType: string;
-    innerUnique: string;
-    filter?: string;
-    rowsRemoved?: string;
-    startUpCost: number;
-    totalCost: number;
-    hashCond?: string; 
-    mergeCond?: string;
-    table: TableNodeData;
+  joinType: string;
+  innerUnique: string;
+  filter?: string;
+  rowsRemoved?: string;
+  startUpCost: number;
+  totalCost: number;
+  hashCond?: string; 
+  mergeCond?: string;
+  table: TableNodeData;
 }
 
-export interface HashJoinNodeData extends JoinNodeData {
-    hashCond: string; 
+export interface AggregateNodeData extends NodeData {
+  startUpCost: number;
+  totalCost: number;
+  filter: string | undefined;
+  groupBy: string[] | undefined; 
+  columns: string[] | undefined;
 }
 
-export interface MergeJoinNodeData extends JoinNodeData {
-    mergeCond: string;
-}
+export type NodeType = "Table" | "Scan" | "Join" | "Aggregate" | "Mini" | "None";

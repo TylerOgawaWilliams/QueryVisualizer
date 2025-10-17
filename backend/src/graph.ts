@@ -10,6 +10,7 @@ import {
   TableNodeInfo,
   TableNodeData,
   Attribute,
+  AggregateNodeData,
 } from "./types/nodeTypes";
 import { Tables } from "./tables";
 
@@ -34,6 +35,8 @@ export class QueryGraph {
       case "Hash Join":
       case "Merge Join": 
         return NodeType.JOIN;
+      case "Aggregate":
+        return NodeType.AGGREGATE;
       case "Hash":
         return NodeType.MINI;
       default:
@@ -164,6 +167,27 @@ export class QueryGraph {
 
   }
 
+  private createAggregateNode(node_info: NodeInfo) : Node {
+    const data : AggregateNodeData = {
+        depth: node_info.depth,
+        name: node_info.nodeType,
+        startUpCost: node_info.startupCost,
+        totalCost: node_info.totalCost,
+        filter: node_info.filter,
+        groupBy: node_info.groupKey,
+        columns: node_info.output
+    };
+
+    const node: Node = {
+      id: node_info.id,
+      type: NodeType.AGGREGATE,
+      position: QueryGraph.default_pos,
+      data: data,
+    };
+
+    return node;
+  }
+
   private createMiniNode(node_info: NodeInfo): Node {
         const data: NodeData = {
             depth: node_info.depth,
@@ -178,7 +202,7 @@ export class QueryGraph {
         };
 
         return node;
-    }
+  }
 
   private createEdge(source_id: string, target_id: string): Edge {
     const edge: Edge = {
@@ -202,7 +226,6 @@ export class QueryGraph {
       const edge = this.createEdge(n.id, n.targetNode);
       nodes.push(node);
       edges.push(edge);
-      console.log("Edge: ", n.id, n.targetNode);
     }
 
     for (const n of node_info) {
@@ -213,8 +236,11 @@ export class QueryGraph {
           break;
         case NodeType.JOIN:
           const join_node = this.createJoinNode(n);
-          console.log("Join node id: ", join_node.id);
           nodes.push(join_node);
+          break;
+        case NodeType.AGGREGATE:
+          const agg_node = this.createAggregateNode(n);
+          nodes.push(agg_node);
           break;
         case NodeType.MINI:
           const mini_node = this.createMiniNode(n); 
@@ -227,10 +253,9 @@ export class QueryGraph {
     }
 
     for (const n of this.links) {
-            const edge = this.createEdge(n.target, n.source);
-            console.log("Edge: ", n.source, n.target);
-            edges.push(edge);
-        }
+        const edge = this.createEdge(n.target, n.source);
+        edges.push(edge);
+    }
 
     return { nodes: nodes, edges: edges };
   }

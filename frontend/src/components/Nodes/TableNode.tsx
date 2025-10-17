@@ -33,54 +33,6 @@ export function TableNode({ data }: NodeProps<TableNodeData>) {
     )
 }
 
-// export function InnerTableNode({ data }: {data: TableNodeData}) {
-//     return (
-//         <>
-//         <div className="name"><h3>Table</h3></div>
-//         <div className="attributes">
-//             <div className="names">
-//                 { data.attributes.map((a, i) => {
-//                     return (
-//                         <div key={i}>
-//                             <p>{a.name}</p>
-//                             { i != data.attributes.length - 1 && (
-//                                 <div className="hline"> </div>
-//                             )}
-//                         </div>
-//                     )
-//                 }) }
-//             </div>
-//             <div className="types">
-//                 { data.attributes.map((a, i) => {
-//                     return (
-//                         <div key={i + data.attributes.length}>
-//                             <p><strong>{a.type}</strong></p>
-//                             { i != data.attributes.length - 1 && (
-//                                 <div className="hline"> </div>
-//                             )}
-//                         </div>
-//                     )
-//                 }) }
-//             </div>
-//             <div className="keyTypes">
-//                 { data.attributes.map((a, i) => {
-//                     return (
-//                         <div key={i + (2 * data.attributes.length)}>
-//                             <p><strong>{a.keyType}&nbsp;</strong></p>
-//                             { i != data.attributes.length - 1 && (
-//                                 <div className="hline"> </div>
-//                             )}
-//                         </div>
-//                     )
-//                 }) }
-//             </div>
-//         </div>
-//         <div className="hline"> </div>
-//         <p className="rowCount">row count: <span>{data.rowCount}</span></p>
-//         </>
-//     )
-// }
-
 export function InnerTableNode({ data }: {data: TableNodeData}) {
     return (
         <>
@@ -100,4 +52,21 @@ export function InnerTableNode({ data }: {data: TableNodeData}) {
         <p className="rowCount">row count: <span>{data.rowCount}</span></p>
         </>
     )
+}
+
+export function InnerTableNode2({ data }: { data: string[] | undefined }) {
+    if (data) {
+        return (
+            <>
+                <div className="name"><h3>Output</h3></div>
+                <div className="attributes single-col">
+                    {data.map((col, i) => {
+                        return (
+                            <p key={i}>{col}</p>
+                        )
+                    })}
+                </div>
+            </>
+        )
+    } else return (<></>);
 }
