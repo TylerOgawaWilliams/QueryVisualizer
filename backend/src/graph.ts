@@ -261,7 +261,7 @@ export class QueryGraph {
           break;
         case NodeType.AGGREGATE:
           const agg_node = this.createAggregateNode(n);
-          agg_node.position = {x: n.depth * 300, y:0}:
+          agg_node.position = {x: n.depth * 300, y:0};
           nodes.push(agg_node);
           break;
         case NodeType.MINI:
