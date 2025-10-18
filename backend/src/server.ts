@@ -38,7 +38,6 @@ app.get("/api/test-query", (req: Request, res: Response<SampleQuery[]>) => {
   ];
 
   res.json(test_query);
-  console.log("Success!");
 });
 
 app.post("/api/query-graph", async (req: Request, res: Response) => {
@@ -53,7 +52,6 @@ app.post("/api/query-graph", async (req: Request, res: Response) => {
 
   try {
     const raw_plan = await db.explainQuery(query);
-    console.log("Raw Query Plan recieved: ", JSON.stringify(raw_plan, null, 2));
     const parsed_plan = PlanParser.parsePlan(raw_plan);
     const execution_order = PlanParser.getExecutionOrder(parsed_plan);
 
@@ -61,7 +59,6 @@ app.post("/api/query-graph", async (req: Request, res: Response) => {
     await tables.init();
     const source_nodes = tables.getTableNodes();
     const links = PlanParser.getTreeLinks(parsed_plan);
-    console.log("Links: ", links);
 
     const queryGraph = new QueryGraph(tables, links);
     const graph = queryGraph.getGraph(execution_order, source_nodes);
@@ -97,7 +94,6 @@ app.post(
     }
 
     try {
-      console.log("Executing query:", query);
       const result = await db.executeQuery(query);
       res.json(result);
     } catch (error) {
@@ -126,12 +122,7 @@ app.post(
     }
 
     try {
-      console.log("Analyzing query:", query);
       const raw_plan = await db.explainQuery(query);
-      console.log(
-        "Raw Query Plan recieved: ",
-        JSON.stringify(raw_plan, null, 2),
-      );
       const parsed_plan = PlanParser.parsePlan(raw_plan);
       const flat_nodes = PlanParser.flattenTree(parsed_plan);
       const links = PlanParser.getTreeLinks(parsed_plan);

@@ -126,7 +126,6 @@ export class QueryGraph {
       const colSplit: string[] = col.split(/\./);
       const currCol = colSplit[1];
       const currRelation = this.tables.getRelationFromAlias(colSplit[0]);
-      console.log(currRelation)
 
       const type = this.tables.getKeyType(currRelation, currCol);
       const isPk = this.tables.isPrimaryKey(currRelation, currCol);
@@ -199,7 +198,6 @@ export class QueryGraph {
       const colSplit: string[] = col.split(/\./);
       const currCol = colSplit[1];
       const currRelation = this.tables.getRelationFromAlias(colSplit[0]);
-      console.log(currRelation)
 
       const type = this.tables.getKeyType(currRelation, currCol);
       const isPk = this.tables.isPrimaryKey(currRelation, currCol);
@@ -297,11 +295,8 @@ export class QueryGraph {
         }
     }
 
-    console.log("Max depth of tree: ", max_depth);
-
     for (const n of node_info) {
       n.depth = Math.abs(n.depth - max_depth) + 1;
-      console.log("New depth: ", n.depth);
       switch (this.getNodeType(n)) {
         case NodeType.SCAN:
           const scan_node = this.createScanNode(n);
@@ -345,7 +340,6 @@ export class QueryGraph {
     }
 
     for (const edge of edges) {
-        console.log("Edge: ", edge.source, edge.target);
         if(edge_dict.has(edge.target)){ 
             const curr_target_node = edge_dict.get(edge.target)!;
             curr_target_node[0].push(edge.source);
@@ -373,14 +367,9 @@ export class QueryGraph {
         }
         if(target_node.type != "Mini") {
             target_node.position.y = source_node.position.y;
-            console.log(`Target node type and : ${target_node.type}, ${target_node.position.y} `);
-            console.log("Target node id: ", target_node.id);
         }
         else {
-            console.log("Problem type: ", target_node.type);
             target_node.position.y = source_node.position.y + 100;
-            console.log("New mini target pos: ", target_node.position.y);
-            console.log("Mini target node id: ", target_node.id);
         }
     }
 
@@ -409,8 +398,6 @@ export class QueryGraph {
         } else {
             curr_node.position.y = baseHeight;
         }
-        
-        console.log(`Set node ${nodeId} height to: ${curr_node.position.y}`);
         
         const outgoing_edge = curr_edge_info[1];
         if (outgoing_edge && outgoing_edge !== "") {

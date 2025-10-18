@@ -15,10 +15,6 @@ export class PlanParser {
   ): NodeInfo {
     const id = `node-${++this.nodeCounter}`;
 
-    console.log(`Processing node at depth ${depth}: ${node["Node Type"]}`);
-    console.log(`Node has ${node.Plans?.length || 0} children`);
-    console.log("Node: ", node);
-
     const single_node: NodeInfo = {
       id,
       nodeType: node["Node Type"],
@@ -48,9 +44,6 @@ export class PlanParser {
 
     // Recursively process children
     if (node.Plans && node.Plans.length > 0) {
-      console.log(
-        `Converting ${node.Plans.length} children for ${node["Node Type"]}`,
-      );
       single_node.children = node.Plans.map((child_plan: PlanNode) =>
         this.convertNode(child_plan, id, depth + 1),
       );

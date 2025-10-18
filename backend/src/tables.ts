@@ -87,7 +87,6 @@ export class Tables {
             if (n.nodeType.includes("Scan") && n.relationName) {
                 const fkResult = await this.db.pool.query(fkQuery, [n.relationName]);
                 const fks = fkResult.rows.map(r => r.fk_column);
-                console.log("Foreign Keys: ", fks);
                 this.foreign_keys[n.relationName] = fks;
             }
         }
@@ -112,8 +111,6 @@ export class Tables {
                         type: r.udt_name,
                         keyType: keyType
                     }
-                    console.log("Attribute: ", attribute);
-                    console.log("Relation name: ", n.relationName);
                     if(!this.keyTypes[n.relationName!]) {
                         this.keyTypes[n.relationName!] = {};
                     }
