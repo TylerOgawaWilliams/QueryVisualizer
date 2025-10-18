@@ -180,6 +180,18 @@ export class Database {
 
                   this.current_database_name = database_name;
                   await this.testConnection();
+                    try {
+                        // Analyze what needs to be converted
+                        await this.analyzeNamingConventions();
+                        
+                        // Convert everything to lowercase
+                        await this.convertAllNamesToLowercase();
+                        
+                        resolve(`Database replaced and connected to ${database_name} (names converted to lowercase)`);
+                    } catch (conversionError) {
+                        console.warn('Database loaded but name conversion failed:', conversionError);
+                        resolve(`Database replaced and connected to ${database_name} (conversion failed - may need quotes)`);
+                    }
                   resolve(
                     `Database replaced and connected to ${database_name}`,
                   );
@@ -214,6 +226,169 @@ export class Database {
       );
     }
   }
+
+async convertAllNamesToLowercase(): Promise<void> {
+  try {
+    console.log('Converting all table and column names to lowercase...');
+    
+    // Step 1: Convert all column names first (before renaming tables)
+    await this.convertAllColumnNames();
+    
+    // Step 2: Convert all table names
+    await this.convertAllTableNames();
+    
+    console.log('All table and column names converted to lowercase');
+    console.log('You can now use queries without quotes!');
+    
+  } catch (error) {
+    console.error('Error during name conversion:', error);
+    throw error;
+  }
+}
+
+async convertAllColumnNames(): Promise<void> {
+  try {
+    console.log('Converting column names...');
+    
+    // Get all tables and their columns that need conversion
+    const result = await this.pool.query(`
+      SELECT 
+        table_name,
+        column_name,
+        data_type,
+        is_nullable,
+        column_default,
+        ordinal_position
+      FROM information_schema.columns 
+      WHERE table_schema = 'public'
+      AND column_name != lower(column_name)  -- only uppercase/mixed case columns
+      ORDER BY table_name, ordinal_position
+    `);
+
+    // Group columns by table
+    const tableColumns = new Map<string, any[]>();
+    
+    for (const row of result.rows) {
+      const tableName = row.table_name;
+      if (!tableColumns.has(tableName)) {
+        tableColumns.set(tableName, []);
+      }
+      tableColumns.get(tableName)!.push(row);
+    }
+
+    // Convert columns for each table
+    for (const [tableName, columns] of tableColumns.entries()) {
+      console.log(`  📋 Converting columns in table "${tableName}"`);
+      
+      for (const column of columns) {
+        const oldName = column.column_name;
+        const newName = oldName.toLowerCase();
+        
+        try {
+          console.log(`    • "${oldName}" → "${newName}"`);
+          await this.pool.query(`ALTER TABLE "${tableName}" RENAME COLUMN "${oldName}" TO "${newName}"`);
+        } catch (error) {
+          console.warn(`     Could not rename column "${oldName}": ${error}`);
+          // Continue with other columns
+        }
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error converting column names:', error);
+    throw error;
+  }
+}
+
+async convertAllTableNames(): Promise<void> {
+  try {
+    console.log('Converting table names...');
+    
+    // Get all tables that need conversion
+    const result = await this.pool.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_type = 'BASE TABLE'
+      AND table_name != lower(table_name)  -- only uppercase/mixed case tables
+      ORDER BY table_name
+    `);
+
+    const tableMap = new Map<string, string>();
+
+    // First pass: rename all tables to temporary names to avoid conflicts
+    console.log('  Step 1: Creating temporary table names...');
+    for (const row of result.rows) {
+      const oldName = row.table_name;
+      const tempName = `temp_${oldName.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+      
+      console.log(`    • "${oldName}" → "${tempName}" (temporary)`);
+      await this.pool.query(`ALTER TABLE "${oldName}" RENAME TO "${tempName}"`);
+      tableMap.set(tempName, oldName.toLowerCase());
+    }
+
+    // Second pass: rename to final lowercase names
+    console.log('  📦 Step 2: Setting final lowercase names...');
+    for (const [tempName, finalName] of tableMap.entries()) {
+      console.log(`    • "${tempName}" → "${finalName}" (final)`);
+      await this.pool.query(`ALTER TABLE "${tempName}" RENAME TO "${finalName}"`);
+    }
+
+    console.log(`✅ Converted ${tableMap.size} table names to lowercase`);
+    
+  } catch (error) {
+    console.error('Error converting table names:', error);
+    throw error;
+  }
+}
+
+// Helper method to check what needs conversion (useful for debugging)
+async analyzeNamingConventions(): Promise<void> {
+  try {
+    // Check tables
+    const tables = await this.pool.query(`
+      SELECT 
+        table_name,
+        CASE WHEN table_name != lower(table_name) THEN 'NEEDS_CONVERSION' ELSE 'OK' END as status
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_type = 'BASE TABLE'
+      ORDER BY table_name
+    `);
+
+    // Check columns
+    const columns = await this.pool.query(`
+      SELECT 
+        table_name,
+        column_name,
+        CASE WHEN column_name != lower(column_name) THEN 'NEEDS_CONVERSION' ELSE 'OK' END as status
+      FROM information_schema.columns 
+      WHERE table_schema = 'public'
+      ORDER BY table_name, column_name
+    `);
+
+    console.log('\n📊 NAMING ANALYSIS:');
+    console.log(`Tables: ${tables.rows.filter(r => r.status === 'NEEDS_CONVERSION').length} need conversion`);
+    console.log(`Columns: ${columns.rows.filter(r => r.status === 'NEEDS_CONVERSION').length} need conversion`);
+    
+    // Show examples
+    const problemTables = tables.rows.filter(r => r.status === 'NEEDS_CONVERSION').slice(0, 5);
+    const problemColumns = columns.rows.filter(r => r.status === 'NEEDS_CONVERSION').slice(0, 5);
+    
+    if (problemTables.length > 0) {
+      console.log('\nTables needing conversion (showing first 5):');
+      problemTables.forEach(t => console.log(`  • "${t.table_name}"`));
+    }
+    
+    if (problemColumns.length > 0) {
+      console.log('\nColumns needing conversion (showing first 5):');
+      problemColumns.forEach(c => console.log(`  • "${c.table_name}".${c.column_name}"`));
+    }
+    
+  } catch (error) {
+    console.error('Error analyzing naming conventions:', error);
+  }
+}
 
   async close(): Promise<void> {
     await this.pool.end();
