@@ -2,6 +2,7 @@ import { type NodeProps, Handle, Position } from "reactflow";
 import type { JoinNodeData } from "../../types";
 import "./joinNode.css"
 import { InnerTableNode } from "./TableNode";
+import { FormatFilter } from "../../helpers/format";
 
 export function JoinNode({ data }: NodeProps<JoinNodeData>) {
     const getJoinCond = () => {
@@ -16,7 +17,7 @@ export function JoinNode({ data }: NodeProps<JoinNodeData>) {
         }
     }
 
-    const joinCond = getJoinCond();
+    const joinCond = FormatFilter(getJoinCond());
 
     return (
         <>
