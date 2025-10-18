@@ -6,15 +6,18 @@ import { FormatFilter } from "../../helpers/format";
 
 export function JoinNode({ data }: NodeProps<JoinNodeData>) {
     const getJoinCond = () => {
-        if(data.hashCond) {
-            return data.hashCond;
-        }
-        else if(data.mergeCond) {
-            return data.mergeCond;
-        }
-        else {
-            return undefined;
-        }
+        if(data.filter && data.hashCond && data.mergeCond) {
+            return `${data.filter} AND ${data.hashCond} AND ${data.mergeCond}`;
+        } else if (data.filter && data.hashCond) {
+            return `${data.filter} AND ${data.hashCond}`;
+        } else if (data.filter && data.mergeCond) {
+            return `${data.filter} AND ${data.mergeCond}`;
+        } else if (data.hashCond && data.mergeCond) {
+            return `${data.hashCond} AND ${data.mergeCond}`;
+        } else if (data.filter) return data.filter;
+        else if (data.hashCond) return data.hashCond;
+        else if (data.mergeCond) return data.mergeCond;
+        else return undefined;
     }
 
     const joinCond = FormatFilter(getJoinCond());
@@ -38,14 +41,17 @@ export function JoinNode({ data }: NodeProps<JoinNodeData>) {
                         <p>Total Cost: </p>
                         <p><strong>{data.totalCost}</strong></p>
                     </div>
-                    <div className="hline"> </div>
                     {joinCond && (
-                        <div className="filter">
-                            <p>Join Condition: </p>
-                            <div>
-                                <p><span>{joinCond}</span></p>
+                        <>
+                            <div className="hline"> </div>  
+                            <div className="filter">
+                                <p>Join Condition: </p>
+                                <div>
+                                    <p><span>{joinCond}</span></p>
+                                </div>
                             </div>
-                        </div>)}
+                        </>
+                    )}
                     <InnerTableNode data={data.table} />
                 </div>
             </div>

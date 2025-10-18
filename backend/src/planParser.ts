@@ -39,7 +39,9 @@ export class PlanParser {
       mergeCond: node["Merge Cond"],
       groupKey: node["Group Key"],
       sortMethod: node["Sort Method"],
-      sortKey: node["Sort Key"]
+      sortKey: node["Sort Key"],
+      subplanName: node["Subplan Name"],
+      parentRelationship: node["Parent Relationship"]
     };
 
     // Recursively process children
@@ -58,10 +60,13 @@ export class PlanParser {
 
     const traverse = (node: NodeInfo): void => {
       node.children.forEach((child) => {
-        links.push({
-          source: node.id,
-          target: child.id,
-        });
+        if (child.parentRelationship !== "InitPlan" && child.parentRelationship !== "SubPlan") {
+          links.push({
+            source: node.id,
+            target: child.id,
+          });
+        }
+
         traverse(child);
       });
     };

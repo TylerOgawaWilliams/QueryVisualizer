@@ -54,9 +54,10 @@ export class QueryGraph {
   }
 
   private createTableNode(node_info: TableNodeInfo): Node {    
+    const alias = node_info.alias;
     const data: TableNodeData = {
       depth: node_info.depth,
-      name: node_info.relationName,
+      name: node_info.relationName + (alias && node_info.relationName !== alias ? ` AS ${alias}` : ""),
       attributes: node_info.columns,
       rowCount: node_info.rowCount,
     };
@@ -95,10 +96,17 @@ export class QueryGraph {
     
     const table : TableNodeData = {
       depth: node_info.depth,
-      name : "",
+      name : "Table",
       attributes: attributes,
       rowCount: node_info.actualRows
     }
+
+    // replace subquery parameters with subquery result
+    const filter = node_info.filter?.replace(
+      /\$(\d)/g, (_, g) => {
+        return this.tables.subQueryResults[`$${g}`]?.join() ?? ""
+      }
+    )
 
     const data : ScanNodeData = {
         depth: node_info.depth,
@@ -106,7 +114,7 @@ export class QueryGraph {
 
         startUpCost: node_info.startupCost,
         totalCost: node_info.totalCost,
-        filter: node_info.filter,
+        filter: filter,
         indexCond: node_info.indexCond,
         table: table
     }
@@ -142,7 +150,7 @@ export class QueryGraph {
     
     const table : TableNodeData = {
       depth: node_info.depth,
-      name : "",
+      name : node_info.subplanName ?? "Table",
       attributes: attributes,
       rowCount: node_info.actualRows
     }
@@ -150,14 +158,14 @@ export class QueryGraph {
     const data : JoinNodeData = {
         depth: node_info.depth,
         name: node_info.nodeType,
-        joinType: node_info.joinType ?? 'unknown',
-        innerUnique: node_info.innerUnique ?? 'unknown',
+        joinType: node_info.joinType,
+        innerUnique: node_info.innerUnique,
         filter: node_info.filter,
-        rowsRemoved: node_info.rowsRemoved ?? 'unknown',
+        rowsRemoved: node_info.rowsRemoved,
         startUpCost: node_info.startupCost,
         totalCost: node_info.totalCost,
-        hashCond: node_info.hashCond ?? 'unknown',
-        mergeCond: node_info.mergeCond ?? 'unknown',
+        hashCond: node_info.hashCond,
+        mergeCond: node_info.mergeCond,
         table: table,
     };
 

@@ -59,6 +59,7 @@ export class Database {
       const plan_wrapper = result.rows[0]["QUERY PLAN"][0];
       const actual_plan = plan_wrapper.Plan;
 
+      console.log("Rows: ", actual_plan);
       console.log("Extracted plan:", JSON.stringify(actual_plan, null, 2));
 
       return actual_plan;

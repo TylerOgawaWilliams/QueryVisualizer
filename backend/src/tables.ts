@@ -10,6 +10,7 @@ export class Tables {
     private aliases: {[key: string] : string};
     private attributes: {[key: string]: Attribute[] }; // maps tables to their attributes
     private tableNodes: TableNodeInfo[]; 
+    public subQueryResults: {[key: string]: string[] | undefined };
 
     constructor(node_info: NodeInfo[]) {
         this.db = new Database();
@@ -20,6 +21,7 @@ export class Tables {
         this.aliases = {}
         this.attributes = {};
         this.tableNodes = [];
+        this.subQueryResults = {};
     }
 
     public async init() {
@@ -99,6 +101,13 @@ export class Tables {
                               ORDER BY ordinal_position`;
 
         for (const n of this.node_info) {
+            if (n.parentRelationship === "InitPlan") {
+                const parameter = n.subplanName?.match(/\$\d/);
+                if (parameter) {
+                    this.subQueryResults[parameter[0]] = n.output;
+                }
+            }
+
             if (n.nodeType.includes("Scan") && n.relationName) {
                 const columnResult = await this.db.pool.query(column_query, [n.relationName]);
                 const attributes = columnResult.rows.map((r) => {
@@ -131,6 +140,7 @@ export class Tables {
                     id: `table-${n.id}`,
                     targetNode: n.id,
                     relationName: n.relationName,
+                    alias: n.alias,
                     columns: attributes,
                     depth: n.depth - 1,
                     rowCount: rowCount
