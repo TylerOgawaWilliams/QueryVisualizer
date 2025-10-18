@@ -4,8 +4,7 @@
 
     .keyTypes {
         strong { color: gray !important; }
-
-        align-self: flex-end;
+        text-align: end;
     }
 }
 
@@ -112,6 +111,7 @@
         p {
             max-width: 35ch;
             word-break: break-all;
+            white-space: pre-wrap;
         }
     }
 }

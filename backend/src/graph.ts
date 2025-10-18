@@ -54,9 +54,10 @@ export class QueryGraph {
   }
 
   private createTableNode(node_info: TableNodeInfo): Node {    
+    const alias = node_info.alias;
     const data: TableNodeData = {
       depth: node_info.depth,
-      name: node_info.relationName,
+      name: node_info.relationName + (alias && node_info.relationName !== alias ? ` AS ${alias}` : ""),
       attributes: node_info.columns,
       rowCount: node_info.rowCount,
     };
@@ -95,10 +96,17 @@ export class QueryGraph {
     
     const table : TableNodeData = {
       depth: node_info.depth,
-      name : "",
+      name : "Table",
       attributes: attributes,
-      rowCount: node_info.planRows
+      rowCount: node_info.actualRows
     }
+
+    // replace subquery parameters with subquery result
+    const filter = node_info.filter?.replace(
+      /\$(\d)/g, (_, g) => {
+        return this.tables.subQueryResults[`$${g}`]?.join() ?? ""
+      }
+    )
 
     const data : ScanNodeData = {
         depth: node_info.depth,
@@ -106,7 +114,7 @@ export class QueryGraph {
 
         startUpCost: node_info.startupCost,
         totalCost: node_info.totalCost,
-        filter: node_info.filter,
+        filter: filter,
         indexCond: node_info.indexCond,
         table: table
     }
@@ -126,7 +134,6 @@ export class QueryGraph {
       const colSplit: string[] = col.split(/\./);
       const currCol = colSplit[1];
       const currRelation = this.tables.getRelationFromAlias(colSplit[0]);
-      console.log(currRelation)
 
       const type = this.tables.getKeyType(currRelation, currCol);
       const isPk = this.tables.isPrimaryKey(currRelation, currCol);
@@ -143,22 +150,22 @@ export class QueryGraph {
     
     const table : TableNodeData = {
       depth: node_info.depth,
-      name : "",
+      name : node_info.subplanName ?? "Table",
       attributes: attributes,
-      rowCount: node_info.planRows
+      rowCount: node_info.actualRows
     }
 
     const data : JoinNodeData = {
         depth: node_info.depth,
         name: node_info.nodeType,
-        joinType: node_info.joinType ?? 'unknown',
-        innerUnique: node_info.innerUnique ?? 'unknown',
+        joinType: node_info.joinType,
+        innerUnique: node_info.innerUnique,
         filter: node_info.filter,
-        rowsRemoved: node_info.rowsRemoved ?? 'unknown',
+        rowsRemoved: node_info.rowsRemoved,
         startUpCost: node_info.startupCost,
         totalCost: node_info.totalCost,
-        hashCond: node_info.hashCond ?? 'unknown',
-        mergeCond: node_info.mergeCond ?? 'unknown',
+        hashCond: node_info.hashCond,
+        mergeCond: node_info.mergeCond,
         table: table,
     };
 
@@ -199,7 +206,6 @@ export class QueryGraph {
       const colSplit: string[] = col.split(/\./);
       const currCol = colSplit[1];
       const currRelation = this.tables.getRelationFromAlias(colSplit[0]);
-      console.log(currRelation)
 
       const type = this.tables.getKeyType(currRelation, currCol);
       const isPk = this.tables.isPrimaryKey(currRelation, currCol);
@@ -297,11 +303,8 @@ export class QueryGraph {
         }
     }
 
-    console.log("Max depth of tree: ", max_depth);
-
     for (const n of node_info) {
       n.depth = Math.abs(n.depth - max_depth) + 1;
-      console.log("New depth: ", n.depth);
       switch (this.getNodeType(n)) {
         case NodeType.SCAN:
           const scan_node = this.createScanNode(n);
@@ -345,7 +348,6 @@ export class QueryGraph {
     }
 
     for (const edge of edges) {
-        console.log("Edge: ", edge.source, edge.target);
         if(edge_dict.has(edge.target)){ 
             const curr_target_node = edge_dict.get(edge.target)!;
             curr_target_node[0].push(edge.source);
@@ -373,14 +375,9 @@ export class QueryGraph {
         }
         if(target_node.type != "Mini") {
             target_node.position.y = source_node.position.y;
-            console.log(`Target node type and : ${target_node.type}, ${target_node.position.y} `);
-            console.log("Target node id: ", target_node.id);
         }
         else {
-            console.log("Problem type: ", target_node.type);
             target_node.position.y = source_node.position.y + 100;
-            console.log("New mini target pos: ", target_node.position.y);
-            console.log("Mini target node id: ", target_node.id);
         }
     }
 
@@ -409,8 +406,6 @@ export class QueryGraph {
         } else {
             curr_node.position.y = baseHeight;
         }
-        
-        console.log(`Set node ${nodeId} height to: ${curr_node.position.y}`);
         
         const outgoing_edge = curr_edge_info[1];
         if (outgoing_edge && outgoing_edge !== "") {

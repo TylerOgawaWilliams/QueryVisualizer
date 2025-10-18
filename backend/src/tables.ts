@@ -10,6 +10,7 @@ export class Tables {
     private aliases: {[key: string] : string};
     private attributes: {[key: string]: Attribute[] }; // maps tables to their attributes
     private tableNodes: TableNodeInfo[]; 
+    public subQueryResults: {[key: string]: string[] | undefined };
 
     constructor(node_info: NodeInfo[]) {
         this.db = new Database();
@@ -20,6 +21,7 @@ export class Tables {
         this.aliases = {}
         this.attributes = {};
         this.tableNodes = [];
+        this.subQueryResults = {};
     }
 
     public async init() {
@@ -87,7 +89,6 @@ export class Tables {
             if (n.nodeType.includes("Scan") && n.relationName) {
                 const fkResult = await this.db.pool.query(fkQuery, [n.relationName]);
                 const fks = fkResult.rows.map(r => r.fk_column);
-                console.log("Foreign Keys: ", fks);
                 this.foreign_keys[n.relationName] = fks;
             }
         }
@@ -100,6 +101,13 @@ export class Tables {
                               ORDER BY ordinal_position`;
 
         for (const n of this.node_info) {
+            if (n.parentRelationship === "InitPlan") {
+                const parameter = n.subplanName?.match(/\$\d/);
+                if (parameter) {
+                    this.subQueryResults[parameter[0]] = n.output;
+                }
+            }
+
             if (n.nodeType.includes("Scan") && n.relationName) {
                 const columnResult = await this.db.pool.query(column_query, [n.relationName]);
                 const attributes = columnResult.rows.map((r) => {
@@ -112,8 +120,6 @@ export class Tables {
                         type: r.udt_name,
                         keyType: keyType
                     }
-                    console.log("Attribute: ", attribute);
-                    console.log("Relation name: ", n.relationName);
                     if(!this.keyTypes[n.relationName!]) {
                         this.keyTypes[n.relationName!] = {};
                     }
@@ -124,14 +130,20 @@ export class Tables {
 
                 this.attributes[n.relationName] = attributes;
 
+                // Get row count
+                const rowQuery = `SELECT COUNT(*) FROM ${n.relationName}`;
+                const rowResult = await this.db.pool.query(rowQuery);
+                const rowCount = rowResult.rows[0].count;
+
                 // Create the table node
                 const node : TableNodeInfo = {
                     id: `table-${n.id}`,
                     targetNode: n.id,
                     relationName: n.relationName,
+                    alias: n.alias,
                     columns: attributes,
                     depth: n.depth - 1,
-                    rowCount: n.planRows
+                    rowCount: rowCount
                 }
 
                 this.tableNodes.push(node);

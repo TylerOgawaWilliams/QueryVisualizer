@@ -36,7 +36,7 @@ export function TableNode({ data }: NodeProps<TableNodeData>) {
 export function InnerTableNode({ data }: {data: TableNodeData}) {
     return (
         <>
-        <div className="name"><h3>Table</h3></div>
+        <div className="name"><h3>{data.name}</h3></div>
         <div className="attributes">
             { data.attributes.map((a, i) => {
                 return (

@@ -2,6 +2,7 @@ import { type NodeProps, Handle, Position } from "reactflow";
 import type { ScanNodeData } from "../../types";
 import "./scanNode.css"
 import { InnerTableNode } from "./TableNode";
+import { FormatFilter } from "../../helpers/format";
 
 export function ScanNode({ data }: NodeProps<ScanNodeData>) {
     const getFilter = () => {
@@ -16,7 +17,7 @@ export function ScanNode({ data }: NodeProps<ScanNodeData>) {
         }
     }
 
-    const filter = getFilter();
+    const filter = FormatFilter(getFilter());
 
     return (
         <>

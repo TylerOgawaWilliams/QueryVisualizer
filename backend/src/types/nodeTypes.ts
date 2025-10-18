@@ -8,7 +8,7 @@ export interface PlanNode {
   "Plan Width": number;
   "Actual Total Time"?: number;
   "Actual Startup Time"?: number;
-  "Actual Rows"?: number;
+  "Actual Rows": number;
   "Actual Loops"?: number;
   Plans?: PlanNode[];
   Filter?: string;
@@ -24,6 +24,8 @@ export interface PlanNode {
   "Merge Cond"?: string;
   "Group Key"?: string[];
   "Sort Method"?: string;
+  "Subplan Name"?: string;
+  "Parent Relationship": string;
 }
 
 export interface NodeInfo {
@@ -35,7 +37,7 @@ export interface NodeInfo {
   alias?: string;
   startupCost: number;
   planRows: number;
-  actualRows?: number;
+  actualRows: number;
   actualTime?: number;
   children: NodeInfo[];
   filter?: string;
@@ -51,6 +53,8 @@ export interface NodeInfo {
   groupKey?: string[];
   sortKey?: string[];
   sortMethod?: string;
+  subplanName?: string;
+  parentRelationship: string;
 }
 
 export interface Attribute {
@@ -63,6 +67,7 @@ export interface TableNodeInfo {
   id: string;
   targetNode: string;
   relationName: string;
+  alias: string | undefined;
   columns: Attribute[];
   depth: number;
   rowCount: number;
@@ -110,8 +115,8 @@ export interface ScanNodeData extends NodeData {
 }
 
 export interface JoinNodeData extends NodeData {
-  joinType: string;
-  innerUnique: string;
+  joinType: string | undefined;
+  innerUnique: string | undefined;
   filter?: string;
   rowsRemoved?: string;
   startUpCost: number;

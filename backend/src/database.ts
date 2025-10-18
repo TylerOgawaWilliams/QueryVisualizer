@@ -22,7 +22,6 @@ export class Database {
   private async testConnection(): Promise<void> {
     try {
       const client: PoolClient = await this.pool.connect();
-      console.log("Connected to PostgreSQL database");
       client.release();
     } catch (err) {
       console.error("Database connection failed:", (err as Error).message);
@@ -60,6 +59,7 @@ export class Database {
       const plan_wrapper = result.rows[0]["QUERY PLAN"][0];
       const actual_plan = plan_wrapper.Plan;
 
+      console.log("Rows: ", actual_plan);
       console.log("Extracted plan:", JSON.stringify(actual_plan, null, 2));
 
       return actual_plan;
@@ -114,8 +114,6 @@ export class Database {
       await admin_pool.query(`CREATE DATABASE "${database_name}"`);
       await admin_pool.end();
 
-      console.log(`Database ${database_name} created!`);
-
       return new Promise((resolve, reject) => {
         // Copy file to container
         const dockerCp = spawn("docker", [
@@ -123,8 +121,6 @@ export class Database {
           file_path,
           `postgres-dev:/tmp/uploaded_backup.${isSQL ? "sql" : "tar"}`,
         ]);
-
-        console.log(`Copying ${isSQL ? "SQL" : "TAR"} file to container`);
 
         dockerCp.on("close", (code: number | null) => {
           if (code === 0) {
@@ -159,8 +155,6 @@ export class Database {
                 "/tmp/uploaded_backup.tar",
               ]);
             }
-
-            console.log(`Spawned ${isSQL ? "psql" : "pg_restore"} process`);
 
             restoreProcess.on("close", async (restoreCode: number | null) => {
               try {
