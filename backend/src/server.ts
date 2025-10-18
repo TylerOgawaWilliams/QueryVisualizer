@@ -55,7 +55,7 @@ app.post("/api/query-graph", async (req: Request, res: Response) => {
     const parsed_plan = PlanParser.parsePlan(raw_plan);
     const execution_order = PlanParser.getExecutionOrder(parsed_plan);
 
-    const tables = new Tables(execution_order);
+    const tables = new Tables(db, execution_order);
     await tables.init();
     const source_nodes = tables.getTableNodes();
     const links = PlanParser.getTreeLinks(parsed_plan);

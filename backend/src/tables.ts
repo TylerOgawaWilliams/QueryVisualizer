@@ -12,8 +12,8 @@ export class Tables {
     private tableNodes: TableNodeInfo[]; 
     public subQueryResults: {[key: string]: string[] | undefined };
 
-    constructor(node_info: NodeInfo[]) {
-        this.db = new Database();
+    constructor(db: Database, node_info: NodeInfo[]) {
+        this.db = db;
         this.node_info = node_info;
         this.primary_keys = {};
         this.foreign_keys = {};
