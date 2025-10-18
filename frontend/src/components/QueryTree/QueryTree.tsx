@@ -14,6 +14,7 @@ import { fetchGraph } from '../../helpers/api';
 import { TableNode } from '../Nodes/TableNode';
 import { ScanNode } from '../Nodes/ScanNode';
 import { JoinNode } from '../Nodes/JoinNode';
+import { SortNode } from '../Nodes/SortNode';
 import { MiniNode } from '../Nodes/MiniNode';
 import type { NodeType } from '../../types';
 import "../Nodes/nodes.css";
@@ -23,6 +24,7 @@ const nodeTypes : { [key in NodeType]?: React.ComponentType<any> } = {
     "Table": TableNode,
     "Scan": ScanNode,
     "Join": JoinNode,
+    "Sort": SortNode,
     "Aggregate": AggregateNode,
     "Mini": MiniNode
 }

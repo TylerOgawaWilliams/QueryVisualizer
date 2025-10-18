@@ -11,6 +11,7 @@ import {
   TableNodeData,
   Attribute,
   AggregateNodeData,
+  SortNodeData,
 } from "./types/nodeTypes";
 import { Tables } from "./tables";
 
@@ -40,6 +41,8 @@ export class QueryGraph {
         return NodeType.JOIN;
       case "Aggregate":
         return NodeType.AGGREGATE;
+      case "Sort":
+        return NodeType.SORT;
       case "Hash":
         return NodeType.MINI;
       default:
@@ -191,6 +194,54 @@ export class QueryGraph {
     return node;
   }
 
+  private createSortNode(node_info: NodeInfo) : Node {
+    const attributes = node_info.output?.map((col) => {
+      const colSplit: string[] = col.split(/\./);
+      const currCol = colSplit[1];
+      const currRelation = this.tables.getRelationFromAlias(colSplit[0]);
+      console.log(currRelation)
+
+      const type = this.tables.getKeyType(currRelation, currCol);
+      const isPk = this.tables.isPrimaryKey(currRelation, currCol);
+      const isFk = this.tables.isForeignKey(currRelation, currCol);
+
+      const attribute : Attribute = {
+        name: col,
+        type: type ?? "",
+        keyType: isPk && isFk ? "PK, FK" : isPk ? "PK" : isFk ? "FK" : undefined
+      }
+
+      return attribute;
+    }) ?? [];
+
+    const table : TableNodeData = {
+      depth: node_info.depth,
+      name : "",
+      attributes: attributes,
+      rowCount: node_info.planRows
+    }
+
+    const data : SortNodeData = {
+        depth: node_info.depth,
+        name: node_info.nodeType,
+        startUpCost: node_info.startupCost,
+        totalCost: node_info.totalCost,
+        sortMethod: node_info.sortMethod,
+        sortKey: node_info.sortKey ?? ['unknown'],
+        table: table,
+    };
+
+    const node: Node = {
+      id: node_info.id,
+      type: NodeType.SORT,
+      position: QueryGraph.default_pos,
+      data: data,
+    };
+
+    return node;
+
+  }
+
   private createMiniNode(node_info: NodeInfo): Node {
         const data: NodeData = {
             depth: node_info.depth,
@@ -269,6 +320,12 @@ export class QueryGraph {
           node_dict.set(agg_node.id, agg_node);
           agg_node.position = {x: n.depth * 305, y:0};
           nodes.push(agg_node);
+          break;
+        case NodeType.SORT:
+          const sort_node = this.createSortNode(n);
+          node_dict.set(sort_node.id, sort_node);
+          sort_node.position = { x: n.depth * 305, y:0};
+          nodes.push(sort_node);
           break;
         case NodeType.MINI:
           const mini_node = this.createMiniNode(n); 

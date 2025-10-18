@@ -1,0 +1,19 @@
+.sort {
+    .node-type {
+        background: #228CDB34;
+    }
+    
+    .name {
+        background: #228CDB;
+    }
+    
+    strong, span {
+        color: #228CDB;
+    }
+    
+    .sort-method div,
+    .sort-key div {
+        background: #228CDB34;
+        color: #228CDB;
+    }
+}

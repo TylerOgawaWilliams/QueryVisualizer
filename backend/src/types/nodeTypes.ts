@@ -23,6 +23,7 @@ export interface PlanNode {
   "Inner Unique"?: string; 
   "Merge Cond"?: string;
   "Group Key"?: string[];
+  "Sort Method"?: string;
 }
 
 export interface NodeInfo {
@@ -48,6 +49,8 @@ export interface NodeInfo {
   hashCond?: string;
   mergeCond?: string;
   groupKey?: string[];
+  sortKey?: string[];
+  sortMethod?: string;
 }
 
 export interface Attribute {
@@ -126,6 +129,14 @@ export interface AggregateNodeData extends NodeData {
   columns: string[] | undefined;
 }
 
+export interface SortNodeData extends NodeData {
+  startUpCost: number;
+  totalCost: number;
+  sortMethod: string | undefined;
+  sortKey: string[] | undefined;
+  table: TableNodeData;
+}
+
 /* ---------- */
 
 export enum NodeType {
@@ -133,6 +144,7 @@ export enum NodeType {
   SCAN = "Scan",
   JOIN = "Join",
   AGGREGATE = "Aggregate",
+  SORT = "Sort",
   MINI = "Mini",
   NONE = "None",
 }
