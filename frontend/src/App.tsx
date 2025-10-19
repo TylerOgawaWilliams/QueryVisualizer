@@ -7,6 +7,7 @@ import { useState } from 'react';
 
 function App() {
   const [query, setQuery] = useState("");
+  const [error, setError] = useState(undefined);
 
   return (
     <div className="app-container">
@@ -50,8 +51,8 @@ function App() {
         {/* Content Area */}
         <main className="app-content">
           <ReactFlowProvider>
-            <QueryInput setQuery={setQuery} />
-            <QueryTree query={query} />
+            <QueryInput setQuery={setQuery} error={error} />
+            <QueryTree query={query} setError={setError} />
           </ReactFlowProvider>
         </main>
       </div>

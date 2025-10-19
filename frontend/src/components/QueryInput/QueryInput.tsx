@@ -1,13 +1,14 @@
 import "./queryInput.css"
 import React, { useState } from 'react';
 
-export function QueryInput({ setQuery } : { setQuery : any }) {
+export function QueryInput({ setQuery, error } : { setQuery : any, error: string | undefined }) {
     const [queryTextInput, setQueryTextInput ] = useState('');
 
     const OnRunQuery = async () => {
         try {
             setQuery(queryTextInput);
-        } catch (e) { throw e; }
+        } catch (e) { 
+        }
     }
 
     const handleInputChange = (e: any) => {
@@ -40,6 +41,9 @@ export function QueryInput({ setQuery } : { setQuery : any }) {
                 onChange={handleInputChange}
                 rows={4}
             />
+            <div className="output">
+                <p>{`> `}{ error ? <span className="error">Error: {error}</span> : <span className="success">Success</span>} </p>
+            </div>
         </div>
     )
 }
