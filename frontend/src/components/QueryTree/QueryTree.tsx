@@ -29,16 +29,24 @@ const nodeTypes : { [key in NodeType]?: React.ComponentType<any> } = {
     "Mini": MiniNode
 }
 
-export function QueryTree({ query } : { query : string }) {
+export function QueryTree({ query, setError } : { query : string, setError : React.Dispatch<React.SetStateAction<string | undefined>> }) {
   useEffect(() => {
     if (query === "") return;
     async function graph() {
-      const { graph } = await fetchGraph(query);
-      setNodes(graph.nodes);
-      setEdges(graph.edges);
+      const resp = await fetchGraph(query);
+      const error = resp.error;
+
+      if (error) { setError(error)}
+      else {
+        const graph = resp.graph;
+        setNodes(graph.nodes);
+        setEdges(graph.edges);
+        setError(undefined);
+      }
     }   
     
-    graph();
+    try { graph(); }
+    catch (e) { console.error(e); };
   }, [query])
 
   const [nodes, setNodes, onNodesChange] = useNodesState([]);

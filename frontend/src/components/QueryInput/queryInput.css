@@ -1,4 +1,6 @@
 .query-input {
+    display: flex;
+    flex-direction: column;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -6,11 +8,12 @@
     margin: 15px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     font-family: 'Courier New', monospace;
-    gap: 15px;
+    gap: 1em;
 }
 
 .query-input-header {
     display: flex;
+    gap: 1em;
     justify-content: space-between;
     margin-bottom: 15px;
     padding-bottom: 10px;
@@ -84,4 +87,23 @@
 .query-textarea::placeholder {
     color: #999;
     font-style: italic;
+}
+
+.query-input .output {
+    background: rgba(211, 211, 211, 0.306);
+    padding: 0.51em;
+    border-radius: 5px;
+    font-weight: bold;
+
+    p {
+        color: rgb(171, 170, 170);
+    }
+
+    .error {
+        color: red;
+    }
+
+    .success {
+        color: green;
+    }
 }

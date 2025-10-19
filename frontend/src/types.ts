@@ -70,4 +70,4 @@ export interface AggregateNodeData extends NodeData {
   columns: string[] | undefined;
 }
 
-export type NodeType = "Table" | "Scan" | "Join" | "Aggregate" | "Mini" | "None";
+export type NodeType = "Table" | "Scan" | "Join" | "Aggregate" | "Sort" | "Mini" | "None";
