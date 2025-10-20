@@ -113,7 +113,7 @@
     padding: 0.25em;
     font-weight: bold;
     p {
-      max-width: 35ch;
+      max-width: 30ch;
       word-break: break-all;
       white-space: pre-wrap;
     }
@@ -158,10 +158,10 @@ h3 {
     padding: 0.25em;
     font-weight: bold;
     p {
-      max-width: 35ch;
+      max-width: 30ch;
       word-break: break-all;
       white-space: pre-wrap;
-      font-weight: normal;
+      font-weight: bold;
     }
   }
 }
