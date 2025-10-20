@@ -2,7 +2,7 @@ export interface PlanNode {
   "Node Type": string;
   "Total Cost": number;
   "Relation Name"?: string;
-  "Alias"?: string;
+  Alias?: string;
   "Startup Cost": number;
   "Plan Rows": number;
   "Plan Width": number;
@@ -20,7 +20,7 @@ export interface PlanNode {
   "Sort Key"?: string[];
   "Join Filter"?: string;
   Output?: string[];
-  "Inner Unique"?: string; 
+  "Inner Unique"?: string;
   "Merge Cond"?: string;
   "Group Key"?: string[];
   "Sort Method"?: string;
@@ -121,7 +121,7 @@ export interface JoinNodeData extends NodeData {
   rowsRemoved?: string;
   startUpCost: number;
   totalCost: number;
-  hashCond?: string; 
+  hashCond?: string;
   mergeCond?: string;
   table: TableNodeData;
 }
@@ -130,7 +130,7 @@ export interface AggregateNodeData extends NodeData {
   startUpCost: number;
   totalCost: number;
   filter: string | undefined;
-  groupBy: string[] | undefined; 
+  groupBy: string[] | undefined;
   columns: string[] | undefined;
 }
 
@@ -139,7 +139,7 @@ export interface SortNodeData extends NodeData {
   totalCost: number;
   sortMethod: string | undefined;
   sortKey: string[] | undefined;
-  table: TableNodeData;
+  columns: string[] | undefined;
 }
 
 /* ---------- */
@@ -153,5 +153,3 @@ export enum NodeType {
   MINI = "Mini",
   NONE = "None",
 }
-
-

@@ -1,24 +1,24 @@
 .table {
-    .node-type {
-        background: #f4a15929;
-    }
-    .name {
-        background: #F4A2597a;
-    }   
+  .node-type {
+    background: #f4a15929;
+  }
+  .name {
+    background: #f4a2597a;
+  }
 
-    .types {
-        color: #F4A259;
-    }
+  .types {
+    color: #f4a259;
+  }
 
-    .rowCount span {
-        color: #F4A259;
-    }
+  .rowCount span {
+    color: #f4a259;
+  }
 
-    strong {
-        color: #F4A259;
-    }
+  strong {
+    color: #f4a259;
+  }
 
-    .attributes.single-col p {
-        max_width: 40ch;
-    }
+  .attributes.single-col p {
+    max_width: 40ch;
+  }
 }
