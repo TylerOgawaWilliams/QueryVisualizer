@@ -17,8 +17,4 @@
     strong {
         color: #F4A259;
     }
-
-    .attributes.single-col p {
-        max_width: 40ch;
-    }
 }
