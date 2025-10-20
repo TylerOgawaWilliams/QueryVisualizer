@@ -2,6 +2,7 @@ import { type NodeProps, Handle, Position } from "reactflow";
 import type { TableNodeData } from "../../types";
 import "./tableNode.css"
 import React from "react";
+import { FormatFilter } from "../../helpers/format";
 
 export function TableNode({ data }: NodeProps<TableNodeData>) {
     return (
@@ -41,9 +42,17 @@ export function InnerTableNode({ data }: {data: TableNodeData}) {
             { data.attributes.map((a, i) => {
                 return (
                     <React.Fragment key={i}>
-                        <p>{a.name}</p>
-                        <p><strong>{a.type}</strong></p>
-                        <p className="keyTypes"><strong>{a.keyType}&nbsp;</strong></p>
+                        {a.type && (
+                        <>
+                            <p>{a.name}</p>
+                            <p><strong>{a.type}</strong></p>
+                            <p className="keyTypes"><strong>{a.keyType}&nbsp;</strong></p>
+                        </> )}
+                        { !a.type && (
+                        <>
+                            <p className="span-3">{FormatFilter(a.name)}</p>
+                        </>
+                        )}
                     </React.Fragment>
                 )
             }) }
@@ -62,7 +71,7 @@ export function InnerTableNode2({ data }: { data: string[] | undefined }) {
                 <div className="attributes single-col">
                     {data.map((col, i) => {
                         return (
-                            <p key={i}>{col}</p>
+                            <p key={i}>{FormatFilter(col)}</p>
                         )
                     })}
                 </div>
