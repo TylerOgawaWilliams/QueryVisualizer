@@ -16,15 +16,28 @@ export class Database {
       password: "password",
     });
 
-    this.testConnection();
+    this.testConnection().catch((err) =>
+      console.error("Initial connection test failed: ", err),
+    );
   }
 
   private async testConnection(): Promise<void> {
+    let client: PoolClient | null = null;
     try {
-      const client: PoolClient = await this.pool.connect();
-      client.release();
+      client = await this.pool.connect();
+      console.log(
+        `Successfully connected to database: ${this.current_database_name}`,
+      );
     } catch (err) {
       console.error("Database connection failed:", (err as Error).message);
+    } finally {
+      if (client) {
+        try {
+          client.release();
+        } catch (releaseErr) {
+          console.warn("Could not release client (pool may be closed)");
+        }
+      }
     }
   }
 
@@ -53,6 +66,9 @@ export class Database {
 
   async explainQuery(query: string): Promise<any> {
     try {
+      console.log(
+        `[explainQuery]: Attempting a query on db: ${this.current_database_name}`,
+      );
       const explain_query = `EXPLAIN (ANALYZE, VERBOSE, FORMAT JSON) ${query}`;
       const result = await this.pool.query(explain_query);
 
@@ -74,6 +90,10 @@ export class Database {
     file_path: string,
     database_name: string,
   ): Promise<string> {
+    let temp_pool: Pool | null = null;
+    let admin_pool: Pool | null = null;
+    const oldPool = this.pool; // Save reference to old pool
+
     try {
       const isSQL = file_path.endsWith(".sql");
       const isTAR = file_path.endsWith(".tar");
@@ -86,8 +106,7 @@ export class Database {
 
       // Drop current database if not dvdrental
       if (this.current_database_name !== "dvdrental") {
-        await this.pool.end();
-        const temp_pool = new Pool({
+        temp_pool = new Pool({
           host: "localhost",
           port: 5432,
           database: "postgres",
@@ -95,14 +114,26 @@ export class Database {
           password: "password",
         });
 
+        // Terminate all connections to the database first
+        await temp_pool.query(`
+          SELECT pg_terminate_backend(pg_stat_activity.pid)
+          FROM pg_stat_activity
+          WHERE pg_stat_activity.datname = '${this.current_database_name}'
+            AND pid <> pg_backend_pid()
+        `);
+
+        // Small delay to ensure connections are closed
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
         await temp_pool.query(
           `DROP DATABASE IF EXISTS "${this.current_database_name}"`,
         );
         await temp_pool.end();
+        temp_pool = null;
       }
 
       // Create new database
-      const admin_pool = new Pool({
+      admin_pool = new Pool({
         host: "localhost",
         port: 5432,
         database: "postgres",
@@ -110,9 +141,21 @@ export class Database {
         password: "password",
       });
 
+      // Terminate any existing connections to the target database
+      await admin_pool.query(`
+        SELECT pg_terminate_backend(pg_stat_activity.pid)
+        FROM pg_stat_activity
+        WHERE pg_stat_activity.datname = '${database_name}'
+          AND pid <> pg_backend_pid()
+      `);
+
+      // Small delay to ensure connections are closed
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       await admin_pool.query(`DROP DATABASE IF EXISTS "${database_name}"`);
       await admin_pool.query(`CREATE DATABASE "${database_name}"`);
       await admin_pool.end();
+      admin_pool = null;
 
       return new Promise((resolve, reject) => {
         // Copy file to container
@@ -127,7 +170,6 @@ export class Database {
             let restoreProcess;
 
             if (isSQL) {
-              // Use psql for SQL files
               restoreProcess = spawn("docker", [
                 "exec",
                 "-i",
@@ -141,7 +183,6 @@ export class Database {
                 "/tmp/uploaded_backup.sql",
               ]);
             } else {
-              // Use pg_restore for TAR files
               restoreProcess = spawn("docker", [
                 "exec",
                 "-i",
@@ -158,12 +199,21 @@ export class Database {
 
             restoreProcess.on("close", async (restoreCode: number | null) => {
               try {
-                fs.unlinkSync(file_path); // Clean up file
+                fs.unlinkSync(file_path);
                 console.log("Cleaning up the uploaded file");
-                console.log(`restoreCode: ${restoreCode}`);
 
                 if (restoreCode === 0) {
                   console.log("The restore was successful!");
+
+                  // Close old pool BEFORE creating new one
+                  try {
+                    await oldPool.end();
+                    console.log("Old pool closed successfully");
+                  } catch (endErr) {
+                    console.warn("Error closing old pool:", endErr);
+                  }
+
+                  // Create new pool for the restored database
                   this.pool = new Pool({
                     host: "localhost",
                     port: 5432,
@@ -171,25 +221,42 @@ export class Database {
                     user: "postgres",
                     password: "password",
                   });
-
                   this.current_database_name = database_name;
                   await this.testConnection();
-                    try {
-                        // Analyze what needs to be converted
-                        await this.analyzeNamingConventions();
-                        
-                        // Convert everything to lowercase
-                        await this.convertAllNamesToLowercase();
-                        
-                        resolve(`Database replaced and connected to ${database_name} (names converted to lowercase)`);
-                    } catch (conversionError) {
-                        console.warn('Database loaded but name conversion failed:', conversionError);
-                        resolve(`Database replaced and connected to ${database_name} (conversion failed - may need quotes)`);
-                    }
-                  resolve(
-                    `Database replaced and connected to ${database_name}`,
-                  );
+
+                  try {
+                    await this.analyzeNamingConventions();
+                    await this.convertAllNamesToLowercase();
+                    resolve(
+                      `Database replaced and connected to ${database_name} (names converted to lowercase)`,
+                    );
+                  } catch (conversionError) {
+                    console.warn(
+                      "Database loaded but name conversion failed:",
+                      conversionError,
+                    );
+                    resolve(
+                      `Database replaced and connected to ${database_name} (conversion failed - may need quotes)`,
+                    );
+                  }
                 } else {
+                  // Restore failed - revert to dvdrental
+                  try {
+                    await oldPool.end();
+                  } catch (endErr) {
+                    console.warn("Error closing old pool:", endErr);
+                  }
+
+                  this.pool = new Pool({
+                    host: "localhost",
+                    port: 5432,
+                    database: "dvdrental",
+                    user: "postgres",
+                    password: "password",
+                  });
+                  this.current_database_name = "dvdrental";
+                  await this.testConnection();
+
                   reject(
                     new Error(
                       `${isSQL ? "psql" : "pg_restore"} failed with exit code ${restoreCode}`,
@@ -197,55 +264,153 @@ export class Database {
                   );
                 }
               } catch (error) {
+                // Error during post-restore - revert to dvdrental
+                try {
+                  await oldPool.end();
+                } catch (endErr) {
+                  console.warn("Error closing old pool:", endErr);
+                }
+
+                this.pool = new Pool({
+                  host: "localhost",
+                  port: 5432,
+                  database: "dvdrental",
+                  user: "postgres",
+                  password: "password",
+                });
+                this.current_database_name = "dvdrental";
+                await this.testConnection();
+
                 reject(error);
               }
             });
 
-            // Handle restore process errors
-            restoreProcess.on("error", (error: Error) => {
+            restoreProcess.on("error", async (error: Error) => {
+              try {
+                await oldPool.end();
+              } catch (endErr) {
+                console.warn("Error closing old pool:", endErr);
+              }
+
+              this.pool = new Pool({
+                host: "localhost",
+                port: 5432,
+                database: "dvdrental",
+                user: "postgres",
+                password: "password",
+              });
+              this.current_database_name = "dvdrental";
+              await this.testConnection();
+
               reject(new Error(`Restore process error: ${error.message}`));
             });
           } else {
-            reject(new Error(`Docker copy failed with exit code ${code}`));
+            // Docker copy failed - revert to dvdrental
+            oldPool
+              .end()
+              .catch((err) => console.warn("Error closing old pool:", err))
+              .finally(() => {
+                this.pool = new Pool({
+                  host: "localhost",
+                  port: 5432,
+                  database: "dvdrental",
+                  user: "postgres",
+                  password: "password",
+                });
+                this.current_database_name = "dvdrental";
+                this.testConnection()
+                  .then(() =>
+                    reject(
+                      new Error(`Docker copy failed with exit code ${code}`),
+                    ),
+                  )
+                  .catch(reject);
+              });
           }
         });
 
-        dockerCp.on("error", (error: Error) => {
+        dockerCp.on("error", async (error: Error) => {
+          try {
+            await oldPool.end();
+          } catch (endErr) {
+            console.warn("Error closing old pool:", endErr);
+          }
+
+          this.pool = new Pool({
+            host: "localhost",
+            port: 5432,
+            database: "dvdrental",
+            user: "postgres",
+            password: "password",
+          });
+          this.current_database_name = "dvdrental";
+          await this.testConnection();
+
           reject(new Error(`Docker copy process error: ${error.message}`));
         });
       });
     } catch (error) {
+      // Ensure pools are closed
+      if (temp_pool) {
+        try {
+          await temp_pool.end();
+        } catch (e) {
+          console.warn("Error closing temp_pool:", e);
+        }
+      }
+      if (admin_pool) {
+        try {
+          await admin_pool.end();
+        } catch (e) {
+          console.warn("Error closing admin_pool:", e);
+        }
+      }
+
+      // Revert to dvdrental
+      try {
+        await oldPool.end();
+      } catch (endErr) {
+        console.warn("Error closing old pool:", endErr);
+      }
+
+      this.pool = new Pool({
+        host: "localhost",
+        port: 5432,
+        database: "dvdrental",
+        user: "postgres",
+        password: "password",
+      });
+      this.current_database_name = "dvdrental";
+      await this.testConnection();
+
       throw new Error(
         `Database replacement failed: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
     }
   }
+  async convertAllNamesToLowercase(): Promise<void> {
+    try {
+      console.log("Converting all table and column names to lowercase...");
 
-async convertAllNamesToLowercase(): Promise<void> {
-  try {
-    console.log('Converting all table and column names to lowercase...');
-    
-    // Step 1: Convert all column names first (before renaming tables)
-    await this.convertAllColumnNames();
-    
-    // Step 2: Convert all table names
-    await this.convertAllTableNames();
-    
-    console.log('All table and column names converted to lowercase');
-    console.log('You can now use queries without quotes!');
-    
-  } catch (error) {
-    console.error('Error during name conversion:', error);
-    throw error;
+      // Step 1: Convert all column names first (before renaming tables)
+      await this.convertAllColumnNames();
+
+      // Step 2: Convert all table names
+      await this.convertAllTableNames();
+
+      console.log("All table and column names converted to lowercase");
+      console.log("You can now use queries without quotes!");
+    } catch (error) {
+      console.error("Error during name conversion:", error);
+      throw error;
+    }
   }
-}
 
-async convertAllColumnNames(): Promise<void> {
-  try {
-    console.log('Converting column names...');
-    
-    // Get all tables and their columns that need conversion
-    const result = await this.pool.query(`
+  async convertAllColumnNames(): Promise<void> {
+    try {
+      console.log("Converting column names (first letter to lowercase)...");
+
+      const result = await this.pool.query(`
       SELECT 
         table_name,
         column_name,
@@ -255,92 +420,96 @@ async convertAllColumnNames(): Promise<void> {
         ordinal_position
       FROM information_schema.columns 
       WHERE table_schema = 'public'
-      AND column_name != lower(column_name)  -- only uppercase/mixed case columns
+      AND column_name != lower(substring(column_name, 1, 1)) || substring(column_name, 2)
       ORDER BY table_name, ordinal_position
     `);
 
-    // Group columns by table
-    const tableColumns = new Map<string, any[]>();
-    
-    for (const row of result.rows) {
-      const tableName = row.table_name;
-      if (!tableColumns.has(tableName)) {
-        tableColumns.set(tableName, []);
-      }
-      tableColumns.get(tableName)!.push(row);
-    }
+      const tableColumns = new Map<string, any[]>();
 
-    // Convert columns for each table
-    for (const [tableName, columns] of tableColumns.entries()) {
-      console.log(`  📋 Converting columns in table "${tableName}"`);
-      
-      for (const column of columns) {
-        const oldName = column.column_name;
-        const newName = oldName.toLowerCase();
-        
-        try {
-          console.log(`    • "${oldName}" → "${newName}"`);
-          await this.pool.query(`ALTER TABLE "${tableName}" RENAME COLUMN "${oldName}" TO "${newName}"`);
-        } catch (error) {
-          console.warn(`     Could not rename column "${oldName}": ${error}`);
-          // Continue with other columns
+      for (const row of result.rows) {
+        const tableName = row.table_name;
+        if (!tableColumns.has(tableName)) {
+          tableColumns.set(tableName, []);
+        }
+        tableColumns.get(tableName)!.push(row);
+      }
+
+      for (const [tableName, columns] of tableColumns.entries()) {
+        console.log(`  📋 Converting columns in table "${tableName}"`);
+
+        for (const column of columns) {
+          const oldName = column.column_name;
+          console.log("Old Column name: ", oldName);
+          // Lowercase first letter only, keep rest as-is
+          const newName = oldName.charAt(0).toLowerCase() + oldName.slice(1);
+          console.log("New Column name: ", newName);
+
+          try {
+            console.log(`    • "${oldName}" → "${newName}"`);
+            await this.pool.query(
+              `ALTER TABLE "${tableName}" RENAME COLUMN "${oldName}" TO "${newName}"`,
+            );
+          } catch (error) {
+            console.warn(`     Could not rename column "${oldName}": ${error}`);
+          }
         }
       }
+    } catch (error) {
+      console.error("Error converting column names:", error);
+      throw error;
     }
-    
-  } catch (error) {
-    console.error('Error converting column names:', error);
-    throw error;
   }
-}
 
-async convertAllTableNames(): Promise<void> {
-  try {
-    console.log('Converting table names...');
-    
-    // Get all tables that need conversion
-    const result = await this.pool.query(`
+  async convertAllTableNames(): Promise<void> {
+    try {
+      console.log("Converting table names (first letter to lowercase)...");
+
+      const result = await this.pool.query(`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public' 
       AND table_type = 'BASE TABLE'
-      AND table_name != lower(table_name)  -- only uppercase/mixed case tables
+      AND table_name != lower(substring(table_name, 1, 1)) || substring(table_name, 2)
       ORDER BY table_name
     `);
 
-    const tableMap = new Map<string, string>();
+      const tableMap = new Map<string, string>();
 
-    // First pass: rename all tables to temporary names to avoid conflicts
-    console.log('  Step 1: Creating temporary table names...');
-    for (const row of result.rows) {
-      const oldName = row.table_name;
-      const tempName = `temp_${oldName.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
-      
-      console.log(`    • "${oldName}" → "${tempName}" (temporary)`);
-      await this.pool.query(`ALTER TABLE "${oldName}" RENAME TO "${tempName}"`);
-      tableMap.set(tempName, oldName.toLowerCase());
+      console.log("  Step 1: Creating temporary table names...");
+      for (const row of result.rows) {
+        const oldName = row.table_name;
+        console.log("Old Table name: ", oldName);
+        const tempName = `temp_${oldName.toLowerCase()}_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+
+        console.log(`    • "${oldName}" → "${tempName}" (temporary)`);
+        await this.pool.query(
+          `ALTER TABLE "${oldName}" RENAME TO "${tempName}"`,
+        );
+        // Lowercase first letter only, keep rest as-is
+        const finalName = oldName.charAt(0).toLowerCase() + oldName.slice(1);
+        console.log("Final Table name: ", finalName);
+        tableMap.set(tempName, finalName);
+      }
+
+      console.log("  📦 Step 2: Setting final names...");
+      for (const [tempName, finalName] of tableMap.entries()) {
+        console.log(`    • "${tempName}" → "${finalName}" (final)`);
+        await this.pool.query(
+          `ALTER TABLE "${tempName}" RENAME TO "${finalName}"`,
+        );
+      }
+
+      console.log(`✅ Converted ${tableMap.size} table names (first letter)`);
+    } catch (error) {
+      console.error("Error converting table names:", error);
+      throw error;
     }
-
-    // Second pass: rename to final lowercase names
-    console.log('  📦 Step 2: Setting final lowercase names...');
-    for (const [tempName, finalName] of tableMap.entries()) {
-      console.log(`    • "${tempName}" → "${finalName}" (final)`);
-      await this.pool.query(`ALTER TABLE "${tempName}" RENAME TO "${finalName}"`);
-    }
-
-    console.log(`✅ Converted ${tableMap.size} table names to lowercase`);
-    
-  } catch (error) {
-    console.error('Error converting table names:', error);
-    throw error;
   }
-}
-
-// Helper method to check what needs conversion (useful for debugging)
-async analyzeNamingConventions(): Promise<void> {
-  try {
-    // Check tables
-    const tables = await this.pool.query(`
+  // Helper method to check what needs conversion (useful for debugging)
+  async analyzeNamingConventions(): Promise<void> {
+    try {
+      // Check tables
+      const tables = await this.pool.query(`
       SELECT 
         table_name,
         CASE WHEN table_name != lower(table_name) THEN 'NEEDS_CONVERSION' ELSE 'OK' END as status
@@ -350,8 +519,8 @@ async analyzeNamingConventions(): Promise<void> {
       ORDER BY table_name
     `);
 
-    // Check columns
-    const columns = await this.pool.query(`
+      // Check columns
+      const columns = await this.pool.query(`
       SELECT 
         table_name,
         column_name,
@@ -361,28 +530,37 @@ async analyzeNamingConventions(): Promise<void> {
       ORDER BY table_name, column_name
     `);
 
-    console.log('\n📊 NAMING ANALYSIS:');
-    console.log(`Tables: ${tables.rows.filter(r => r.status === 'NEEDS_CONVERSION').length} need conversion`);
-    console.log(`Columns: ${columns.rows.filter(r => r.status === 'NEEDS_CONVERSION').length} need conversion`);
-    
-    // Show examples
-    const problemTables = tables.rows.filter(r => r.status === 'NEEDS_CONVERSION').slice(0, 5);
-    const problemColumns = columns.rows.filter(r => r.status === 'NEEDS_CONVERSION').slice(0, 5);
-    
-    if (problemTables.length > 0) {
-      console.log('\nTables needing conversion (showing first 5):');
-      problemTables.forEach(t => console.log(`  • "${t.table_name}"`));
+      console.log("\n📊 NAMING ANALYSIS:");
+      console.log(
+        `Tables: ${tables.rows.filter((r) => r.status === "NEEDS_CONVERSION").length} need conversion`,
+      );
+      console.log(
+        `Columns: ${columns.rows.filter((r) => r.status === "NEEDS_CONVERSION").length} need conversion`,
+      );
+
+      // Show examples
+      const problemTables = tables.rows
+        .filter((r) => r.status === "NEEDS_CONVERSION")
+        .slice(0, 5);
+      const problemColumns = columns.rows
+        .filter((r) => r.status === "NEEDS_CONVERSION")
+        .slice(0, 5);
+
+      if (problemTables.length > 0) {
+        console.log("\nTables needing conversion (showing first 5):");
+        problemTables.forEach((t) => console.log(`  • "${t.table_name}"`));
+      }
+
+      if (problemColumns.length > 0) {
+        console.log("\nColumns needing conversion (showing first 5):");
+        problemColumns.forEach((c) =>
+          console.log(`  • "${c.table_name}".${c.column_name}"`),
+        );
+      }
+    } catch (error) {
+      console.error("Error analyzing naming conventions:", error);
     }
-    
-    if (problemColumns.length > 0) {
-      console.log('\nColumns needing conversion (showing first 5):');
-      problemColumns.forEach(c => console.log(`  • "${c.table_name}".${c.column_name}"`));
-    }
-    
-  } catch (error) {
-    console.error('Error analyzing naming conventions:', error);
   }
-}
 
   async close(): Promise<void> {
     await this.pool.end();
